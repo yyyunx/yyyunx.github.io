@@ -4,7 +4,7 @@ import NoteCard from "./NoteCard.astro";
 ---
 
 <section class="section notes-section" id="notes" aria-labelledby="notes-heading">
-  <div class="shell"><div class="section-heading"><div><p class="section-kicker">公開筆記</p><h2 id="notes-heading">研究與技術筆記</h2></div><a href="/notes/" class="text-link">查看所有筆記 <span aria-hidden="true">→</span></a></div>
+  <div class="shell"><div class="section-heading"><div><p class="section-kicker">公開筆記</p><h2 id="notes-heading">NOTES</h2></div><a href="/notes/" class="text-link">查看所有筆記 <span aria-hidden="true">→</span></a></div>
     <div class="notes-grid">{notes.map((note) => <NoteCard note={note} />)}</div>
   </div>
 </section>
