@@ -1,0 +1,11 @@
+---
+import { milestones, profile } from "../data/portfolio";
+---
+
+<section class="section about-section" id="about" aria-labelledby="about-heading">
+  <div class="shell"><div class="section-heading"><div><p class="section-kicker">關於我的更多資訊</p><h2 id="about-heading">關於我</h2></div></div>
+    <div class="about-grid"><div class="about-profile"><div class="avatar" aria-label="姓名縮寫頭像 placeholder"><span>YL</span></div><div><p>{profile.bio}</p><p class="about-secondary">我重視清楚的問題定義、可靠的工程實作，也相信在動手打造產品的過程中持續學習。</p><ul class="profile-details"><li><span aria-hidden="true">⌖</span>{profile.location}</li><li><span aria-hidden="true">✦</span>學歷 — 請填入個人資料</li></ul></div></div>
+      <ol class="timeline">{milestones.map((milestone, index) => <li><span class="timeline-icon">{["⌘", "✦", "↗", "⌁"][index]}</span><div><h3>{milestone.label}</h3><p>{milestone.detail}</p></div></li>)}</ol>
+    </div>
+  </div>
+</section>

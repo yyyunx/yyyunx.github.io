@@ -1,0 +1,8 @@
+---
+import { profile } from "../data/portfolio";
+---
+
+<footer id="contact" class="site-footer">
+  <div class="shell footer-grid"><div><a class="brand" href="#top">{profile.name}</a><p>打造從資料到部署的<br />實用 AI 系統。</p></div><div><strong>GitHub</strong><a href={profile.githubHref} target="_blank" rel="noreferrer">{profile.github}</a></div><div><strong>Email</strong><a href={profile.emailHref}>{profile.email}</a></div><div><strong>LinkedIn</strong><a href={profile.linkedinHref}>{profile.linkedin}</a></div></div>
+  <div class="shell footer-bottom">© {new Date().getFullYear()} {profile.name}。保留所有權利。</div>
+</footer>

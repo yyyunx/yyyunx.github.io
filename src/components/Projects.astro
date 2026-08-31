@@ -1,0 +1,11 @@
+---
+import { projects } from "../data/portfolio";
+import ProjectCard from "./ProjectCard.astro";
+---
+
+<section class="section projects-section" id="projects" aria-labelledby="projects-heading">
+  <div class="shell">
+    <div class="section-heading"><div><p class="section-kicker">精選作品</p><h2 id="projects-heading">代表專案</h2></div><a href="#" class="text-link">查看所有專案 <span aria-hidden="true">→</span></a></div>
+    <div class="projects-grid">{projects.map((project) => <ProjectCard project={project} />)}</div>
+  </div>
+</section>

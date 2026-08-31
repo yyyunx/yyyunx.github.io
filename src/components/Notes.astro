@@ -1,0 +1,9 @@
+---
+import { notes } from "../data/portfolio";
+---
+
+<section class="section notes-section" id="notes" aria-labelledby="notes-heading">
+  <div class="shell"><div class="section-heading"><div><p class="section-kicker">公開筆記</p><h2 id="notes-heading">研究與技術筆記</h2></div><a href="#" class="text-link">查看所有筆記 <span aria-hidden="true">→</span></a></div>
+    <div class="notes-grid">{notes.map((note) => <article class="note-card"><div class:list={["note-visual", note.visual]} aria-hidden="true">{note.visual === "exif" && <><b>EXIF</b><i>ORIENTATION</i><span></span></>}{note.visual === "runnable" && <><span>Runnable</span><i>LLM</i><b>Output</b></>}{note.visual === "terrain" && <><i></i><b></b><span></span></>}</div><div class="note-content"><p class="note-category">{note.category}</p><h3>{note.title}</h3><p>{note.description}</p><a href={note.href}>閱讀筆記 <span aria-hidden="true">→</span></a></div></article>)}</div>
+  </div>
+</section>

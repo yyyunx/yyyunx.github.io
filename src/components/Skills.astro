@@ -1,0 +1,11 @@
+---
+import { skills } from "../data/portfolio";
+---
+
+<section class="section skills-section" aria-labelledby="skills-heading">
+  <div class="shell"><div class="section-heading"><div><p class="section-kicker">專業能力</p><h2 id="skills-heading">技能與專注領域</h2></div></div>
+    <div class="skills-grid">
+      {skills.map((skill) => <article class="skill-card"><div class:list={["skill-icon", skill.icon]}>{skill.icon === "brain" && "⌘"}{skill.icon === "code" && "</>"}{skill.icon === "vision" && "◉"}{skill.icon === "data" && "⌁"}</div><h3>{skill.title}</h3><ul>{skill.items.map((item) => <li>{item}</li>)}</ul></article>)}
+    </div>
+  </div>
+</section>
