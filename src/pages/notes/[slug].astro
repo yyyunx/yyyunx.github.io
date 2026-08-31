@@ -1,0 +1,40 @@
+---
+import Footer from "../../components/Footer.astro";
+import Header from "../../components/Header.astro";
+import { notes, type Note } from "../../data/portfolio";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export function getStaticPaths() {
+  return notes.map((note) => ({
+    params: { slug: note.slug },
+    props: { note },
+  }));
+}
+
+const { note } = Astro.props as { note: Note };
+---
+
+<BaseLayout title={`${note.title} | YunHsi Lee`} description={note.description}>
+  <Header />
+  <main class="article-page">
+    <article class="article-shell">
+      <a class="back-link" href="/notes/">← 返回所有筆記</a>
+      <header class="article-header">
+        <p class="note-category">{note.category}</p>
+        <h1>{note.title}</h1>
+        <p>{note.description}</p>
+      </header>
+      <div class:list={["article-cover", note.visual]} aria-hidden="true">
+        <span>{note.visual === "exif" ? "EXIF / ORIENTATION" : note.visual === "runnable" ? "RUNNABLE / LLM" : "GEOTIFF / ELEVATION"}</span>
+      </div>
+      <div class="article-body">
+        {note.sections.map((section) => <section><h2>{section.heading}</h2>{section.paragraphs.map((paragraph) => <p>{paragraph}</p>)}</section>)}
+      </div>
+      <footer class="article-end">
+        <p>這篇筆記由 YunHsi Lee 整理。</p>
+        <a href="/notes/">繼續閱讀其他筆記 <span aria-hidden="true">→</span></a>
+      </footer>
+    </article>
+  </main>
+  <Footer />
+</BaseLayout>
