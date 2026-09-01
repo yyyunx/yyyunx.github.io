@@ -2,8 +2,11 @@
 import Footer from "../../components/Footer.astro";
 import Header from "../../components/Header.astro";
 import NoteCard from "../../components/NoteCard.astro";
-import { notes } from "../../data/portfolio";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const notes = (await getCollection("notes", ({ data }) => !data.draft))
+  .sort((a, b) => a.data.order - b.data.order);
 ---
 
 <BaseLayout title="研究與技術筆記 | YunHsi Lee" description="YunHsi Lee 關於 AI、電腦視覺與資料系統的研究及技術筆記。">

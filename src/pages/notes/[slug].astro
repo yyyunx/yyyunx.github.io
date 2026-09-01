@@ -1,34 +1,37 @@
 ---
 import Footer from "../../components/Footer.astro";
 import Header from "../../components/Header.astro";
-import { notes, type Note } from "../../data/portfolio";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection, render, type CollectionEntry } from "astro:content";
 
-export function getStaticPaths() {
+export async function getStaticPaths() {
+  const notes = await getCollection("notes", ({ data }) => !data.draft);
   return notes.map((note) => ({
-    params: { slug: note.slug },
+    params: { slug: note.id },
     props: { note },
   }));
 }
 
-const { note } = Astro.props as { note: Note };
+const { note } = Astro.props as { note: CollectionEntry<"notes"> };
+const { title, description, category, visual } = note.data;
+const { Content } = await render(note);
 ---
 
-<BaseLayout title={`${note.title} | YunHsi Lee`} description={note.description}>
+<BaseLayout title={`${title} | YunHsi Lee`} description={description}>
   <Header />
   <main class="article-page">
     <article class="article-shell">
       <a class="back-link" href="/notes/">← 返回所有筆記</a>
       <header class="article-header">
-        <p class="note-category">{note.category}</p>
-        <h1>{note.title}</h1>
-        <p>{note.description}</p>
+        <p class="note-category">{category}</p>
+        <h1>{title}</h1>
+        <p>{description}</p>
       </header>
-      <div class:list={["article-cover", note.visual]} aria-hidden="true">
-        <span>{note.visual === "exif" ? "EXIF / ORIENTATION" : note.visual === "runnable" ? "RUNNABLE / LLM" : "GEOTIFF / ELEVATION"}</span>
+      <div class:list={["article-cover", visual]} aria-hidden="true">
+        <span>{visual === "exif" ? "EXIF / ORIENTATION" : visual === "runnable" ? "RUNNABLE / LLM" : "GEOTIFF / ELEVATION"}</span>
       </div>
       <div class="article-body">
-        {note.sections.map((section) => <section><h2>{section.heading}</h2>{section.paragraphs.map((paragraph) => <p>{paragraph}</p>)}</section>)}
+        <Content />
       </div>
       <footer class="article-end">
         <p>這篇筆記由 YunHsi Lee 整理。</p>

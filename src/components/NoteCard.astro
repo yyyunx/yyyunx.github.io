@@ -1,20 +1,21 @@
 ---
-import type { Note } from "../data/portfolio";
+import type { CollectionEntry } from "astro:content";
 
-type Props = { note: Note };
+type Props = { note: CollectionEntry<"notes"> };
 const { note } = Astro.props;
+const { title, description, category, visual } = note.data;
 ---
 
 <article class="note-card">
-  <div class:list={["note-visual", note.visual]} aria-hidden="true">
-    {note.visual === "exif" && <><b>EXIF</b><i>ORIENTATION</i><span></span></>}
-    {note.visual === "runnable" && <><span>Runnable</span><i>LLM</i><b>Output</b></>}
-    {note.visual === "terrain" && <><i></i><b></b><span></span></>}
+  <div class:list={["note-visual", visual]} aria-hidden="true">
+    {visual === "exif" && <><b>EXIF</b><i>ORIENTATION</i><span></span></>}
+    {visual === "runnable" && <><span>Runnable</span><i>LLM</i><b>Output</b></>}
+    {visual === "terrain" && <><i></i><b></b><span></span></>}
   </div>
   <div class="note-content">
-    <p class="note-category">{note.category}</p>
-    <h3>{note.title}</h3>
-    <p>{note.description}</p>
-    <a href={note.href}>閱讀筆記 <span aria-hidden="true">→</span></a>
+    <p class="note-category">{category}</p>
+    <h3>{title}</h3>
+    <p>{description}</p>
+    <a href={`/notes/${note.id}/`}>閱讀筆記 <span aria-hidden="true">→</span></a>
   </div>
 </article>
