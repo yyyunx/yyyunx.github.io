@@ -15,9 +15,9 @@ export type Skill = {
 
 export const profile = {
   name: "YunHsi Lee",
-  role: "AI 與軟體工程作品集",
-  bio: "我專注於打造實用的 AI 系統與軟體產品，特別關注電腦視覺、AI 應用，以及資料驅動的系統開發。",
-  location: "所在地 — 請填入城市",
+  role: "資訊工程學生作品集",
+  bio: "我是國立中山大學資訊工程學系全英學士班大三學生，目前主要透過課程、專案、實習與黑客松累積軟體開發與 AI 相關經驗。",
+  location: "所在地 — 高雄",
   email: "yyyunxiii419@gmail.com",
   emailHref: "mailto:yyyunxiii419@gmail.com",
   github: "github.com/yyyunx",
@@ -62,8 +62,8 @@ export const skills: Skill[] = [
 ];
 
 export const milestones = [
-  { label: "資訊科學", detail: "建立軟體開發與系統設計的基礎。" },
-  { label: "AI 專案", detail: "將研究與實驗轉化為實際應用。" },
-  { label: "黑客松", detail: "透過團隊協作快速實作與迭代。" },
-  { label: "技術學習", detail: "持續深化工程能力與實作經驗。" },
+  { label: "資訊工程", detail: "透過課程與專案建立程式設計、資料結構與軟體開發基礎。" },
+  { label: "AI 與電腦視覺", detail: "目前主要接觸 AI 應用、影像處理與電腦視覺相關專案。" },
+  { label: "專案與黑客松", detail: "透過團隊專案與黑客松練習把想法做成可以實際操作的成果。" },
+  { label: "技術學習", detail: "把開發過程中遇到的新技術整理成筆記，持續累積實作經驗。" },
 ];
