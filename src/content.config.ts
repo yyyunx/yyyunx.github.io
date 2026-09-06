@@ -8,7 +8,7 @@ const notes = defineCollection({
     title: z.string(),
     description: z.string(),
     category: z.string().default("技術筆記"),
-    visual: z.enum(["exif", "runnable", "terrain"]).default("runnable"),
+  visual: z.enum(["exif", "runnable", "terrain", "map"]).default("runnable"),
     pubDate: z.coerce.date().optional(),
     tags: z.array(z.string()).default([]),
     slug: z.string().optional(),

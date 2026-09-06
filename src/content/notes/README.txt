@@ -10,5 +10,5 @@
 檔名會成為網址：
 my-new-note.md -> /notes/my-new-note/
 
-visual 可使用：exif、runnable、terrain
+visual 可使用：exif、runnable、terrain、map
 order 數字越小，文章排列越前面。

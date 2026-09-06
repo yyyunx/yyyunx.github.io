@@ -35,7 +35,7 @@ const formattedDate = pubDate
         </div>}
       </header>
       <div class:list={["article-cover", visual]} aria-hidden="true">
-        <span>{visual === "exif" ? "EXIF / ORIENTATION" : visual === "runnable" ? "RUNNABLE / LLM" : "GEOTIFF / ELEVATION"}</span>
+        <span>{visual === "exif" ? "EXIF / ORIENTATION" : visual === "runnable" ? "RUNNABLE / LLM" : visual === "map" ? "OSM / WEB MAP" : "GEOTIFF / ELEVATION"}</span>
       </div>
       <div class="article-body">
         <Content />

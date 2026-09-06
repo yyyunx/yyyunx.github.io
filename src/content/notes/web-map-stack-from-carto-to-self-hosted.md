@@ -1,8 +1,8 @@
 ---
-title: "從 CARTO 到 Self-Hosted Map：我如何理解 Web Mapping Stack"
-description: "從一次地圖服務 self-hosting 的需求出發，追完整條 OSM → PostGIS → Tile Server → XYZ Tiles → Leaflet 的 Web Map data flow。"
+title: "從 OSM 到 Browser：我如何理解 Web Mapping Stack"
+description: "從一次 CARTO self-hosting 需求出發，追完整條 OSM → PostGIS → Tile Server → XYZ Tiles → HTTP → Leaflet 的 Web Map data flow。"
 category: "GIS / Web Map"
-visual: "terrain"
+visual: "map"
 pubDate: 2026-09-06
 tags: ["GIS", "OpenStreetMap", "Leaflet", "PostGIS", "Docker", "Web Map"]
 slug: "web-map-stack-from-carto-to-self-hosted"
@@ -30,7 +30,7 @@ Leaflet → CARTO → 地圖出現
 
 ## From OSM Data to a Map in the Browser
 
-真正去追整個流程後，我才理解：**瀏覽器其實從來沒有「下載一張完整地圖」。** 它下載的是很多個小 tile；這些 tile 又是從 OSM geographic data 經過 import、spatial query、projection 與 rendering 後產生的。
+真正去追整個流程後，我才理解：**瀏覽器其實從來沒有「下載一張完整地圖」。** 它下載的是很多個小 tile。在我們採用的 raster tile stack 中，OSM data 會先經過 import 與 preprocessing；需要動態 rendering 時，Tile Server 可以查詢 spatial database、套用 style 並產生 tile，而已快取或預先產生的 tile 則可以直接回傳。
 
 我現在會把整條 pipeline 拆成兩個階段：
 
@@ -131,9 +131,9 @@ inside this tile's bounding box
 | `.osm.pbf` | canonical geographic source / transport format |
 | PostGIS | runtime spatial storage and query layer |
 
-這個區分也適用在 HINO 的 telemetry data。OSM 提供底圖與道路網路；車輛位置、geofence、journey 與營運資料則是 application data，進 PostGIS 的目的是做可控的空間查詢，而不是取代 OSM。
+這個區分也讓我開始把 basemap data 和 application data 分開思考。OSM 提供道路、行政區與底圖資料；車輛位置、geofence、journey 與 telemetry 則屬於產品自己的 application data。兩者最後可以一起呈現在 Leaflet 上，但資料來源與處理流程並不相同。
 
-## Step 3 — The Browser Does Not Request “Taipei”
+## From Viewport to XYZ Tile Requests
 
 當我在 Leaflet 打開台北地圖時，browser 不會 request `GET /map/taipei`，也不會 request `Give me the whole Taiwan map.`。真正發生的是一組 tile request：
 
@@ -151,7 +151,7 @@ Browser 只下載目前 viewport 需要的 tiles。這也是為什麼 Web Map �
 
 > **The browser never requests “a map.” It requests a set of XYZ tiles required by the current viewport. Leaflet then arranges those independent HTTP responses into what the user perceives as one continuous map.**
 
-## Step 4 — From Longitude / Latitude to XYZ
+### From Longitude / Latitude to XYZ
 
 Leaflet 知道 map center、viewport size 與 zoom level，例如：
 
@@ -187,7 +187,7 @@ x = floor((longitude + 180) / 360 × 2^z)
 
 Latitude 則不是 linear mapping，因為 Web Mercator 對 latitude 使用 nonlinear transformation。因此 `(latitude + 90) / 180` 不能直接拿來算 Web Map 的 Y tile。這也是我後來才理解，為什麼 Web Mercator 的 latitude 範圍大約限制在 `±85.0511°`，而不是完整的 `±90°`。
 
-## Step 5 — What Does Zoom Actually Mean?
+### What zoom actually means
 
 XYZ Tile Scheme 中：
 
@@ -214,9 +214,9 @@ theoretical tile count = 4^z
 
 所以 zoom 越高，每個 tile 覆蓋的 geographic area 越小，detail 越高。Raster tile 很常是 `256 × 256 px`；Leaflet 就能根據 viewport、tile size 與中心點，算出當前畫面需要哪些 tiles。
 
-## Step 6 — What Happens Inside the Tile Server?
+## What Happens After a Tile HTTP Request?
 
-收到 `/z/x/y` 後，Tile Server 先把 tile coordinate 轉回 geographic bounding box，再取得這個範圍裡需要的 objects：
+收到 `/z/x/y` 後，Tile Server 會先檢查 cache；如果沒有可直接回傳的 tile，才把 tile coordinate 轉回 geographic bounding box，取得這個範圍裡需要的 objects：
 
 ```text
 z/x/y
@@ -245,7 +245,7 @@ HTTP/1.1 200 OK
 Content-Type: image/png
 ```
 
-## Step 7 — One HTTP Response Is Not the Map
+## How Leaflet Builds and Updates the Map
 
 一個 `256 × 256` tile 通常只佔螢幕的一小部分。假設畫面需要 4 columns × 3 rows，browser 可能需要 12 個獨立 request；Leaflet 再按照 `z / x / y` 把它們放到正確位置：
 
@@ -281,7 +281,7 @@ Leaflet positions every tile
 One continuous map
 ```
 
-## Step 8 — What Happens When I Drag the Map?
+### Panning only fetches what is new
 
 當使用者拖動地圖，Leaflet 不需要重新取得所有東西。原本仍在畫面中的 tile 可以繼續使用，只有新進入 viewport 的區域需要 request：
 
@@ -301,7 +301,7 @@ H I L
 
 `B C / E F / H I` 已經存在，只需要 request `J / K / L`。Browser cache 或 Tile Cache 還能進一步減少重複 request 與 rendering；這是 tile-based Web Map 能流暢 pan 的重要原因之一。
 
-## Step 9 — Tile Cache and Pre-generated Tiles
+## Cache, Raster Tiles and Pre-generated Archives
 
 我一開始以為 Tile Server 每次收到 `GET /z/x/y` 都一定會 query PostGIS 再 render。後來才發現，實際架構不一定如此：
 
@@ -331,7 +331,7 @@ MBTiles / PMTiles
 → prepared tile archive
 ```
 
-## Step 10 — Basemap and Application Data Are Different Layers
+## Basemap and Application Data Are Different Layers
 
 Leaflet 顯示出來的東西，不一定全部來自 Tile Server。Road、building、river、administrative boundary 等 basemap 可能來自 raster tiles；但 HINO application 自己的 vehicle marker、journey route、telemetry point、event marker、geofence 通常是另外一層。
 
@@ -429,4 +429,12 @@ After: our own infrastructure
 
 這也是我這次最大的理解之一。Self-hosting map service 並不是自己寫一套 Leaflet，而是把原本位於 Leaflet 後面的 map-serving layer，從 third-party provider 移回自己的 infrastructure。
 
-下一步我想繼續補上的，不是更多名詞，而是把這些服務的 health check、資料更新流程與快取策略真的接進專案，讓這個理解能落到可維護的工程實作上。
+## What I Took Away
+
+這次最大的收穫不是學會使用某一個 GIS library，而是建立了一個能用來定位問題的 mental model。
+
+當底圖消失時，我現在知道要從 tile URL、Tile Server、cache 或 rendering pipeline 往下查；地址搜尋有問題時，應該看 geocoder；路徑結果不合理時，則回到 routing engine。
+
+原本的 `Leaflet → CARTO → Map` 對我來說是一個黑盒子。把整條 data flow 拆開後，我開始能從資料來源、projection、HTTP request 到 browser rendering，理解每一層真正負責的事情。
+
+> **CARTO was no longer “the map.” It was one provider in a much larger Web Mapping Stack.**

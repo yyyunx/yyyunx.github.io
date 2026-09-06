@@ -11,6 +11,7 @@ const { title, description, category, visual } = note.data;
     {visual === "exif" && <><b>EXIF</b><i>ORIENTATION</i><span></span></>}
     {visual === "runnable" && <><span>Runnable</span><i>LLM</i><b>Output</b></>}
     {visual === "terrain" && <><i></i><b></b><span></span></>}
+    {visual === "map" && <><b>OSM</b><i>WEB MAP</i><span></span></>}
   </div>
   <div class="note-content">
     <p class="note-category">{category}</p>
