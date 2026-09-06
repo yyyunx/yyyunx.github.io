@@ -1,6 +1,6 @@
 ---
 title: "從 CARTO 到 Self-Hosted Map：我如何理解 Web Mapping Stack"
-description: "從一次地圖服務 self-hosting 的需求出發，重新理解 OSM、XYZ Tiles、Web Mercator、PostGIS、Leaflet、Nominatim 與 OSRM 在 Web Map 中各自扮演的角色。"
+description: "從一次地圖服務 self-hosting 的需求出發，追完整條 OSM → PostGIS → Tile Server → XYZ Tiles → Leaflet 的 Web Map data flow。"
 category: "GIS / Web Map"
 visual: "terrain"
 pubDate: 2026-09-06
@@ -10,117 +10,346 @@ order: 4
 draft: false
 ---
 
-最近在 HINO 車聯網專案中，我遇到一個原本看起來很單純的問題：
+最近在 HINO 車聯網專案中，我遇到一個原本看起來很單純的需求：
 
 > Map service needs to be self-hosted.
 
-專案原本使用 Leaflet 顯示地圖，底圖則來自 CARTO。最開始我其實只知道：
+專案原本使用 Leaflet 顯示地圖，底圖來自 CARTO。最開始我對它的理解其實停在：
 
 ```text
 Leaflet → CARTO → 地圖出現
 ```
 
-但當「把地圖服務自己架起來」變成需求後，這條線顯然不夠用了。我開始遇到更多問題：底圖資料從哪來？Leaflet 到底在做什麼？OSM、PostGIS、Nominatim 和 OSRM 是不是同一類服務？把 Docker container 跑起來，為什麼還不代表整個 map stack 已經可用？
+但當「把地圖服務自己架起來」變成需求後，這條線顯然不夠用了。我開始追問：OSM、PostGIS、Tile Server、Leaflet、Nominatim 與 OSRM 的責任為什麼不同？Docker container 跑起來後，為什麼還不代表整個 map stack 已經可用？
 
-這篇不是要整理一份 GIS 名詞百科，而是記錄我如何從一個實際部署需求，慢慢把 Web Mapping 的 data flow 拆開理解。
+最後我發現，真正值得理解的不是名詞定義，而是這個問題：
 
-## 一開始的誤解：以為「地圖」是一個服務
+> **How does OSM data eventually become the interactive map I see in the browser?**
 
-在使用外部底圖時，前端程式碼通常很短：
+這篇記錄我如何從一次實際的 self-hosting 需求，慢慢把一張 Web Map 的完整生命週期追出來。
 
-```ts
-L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap contributors © CARTO",
-}).addTo(map);
-```
+## From OSM Data to a Map in the Browser
 
-這段程式很容易讓人形成一個直覺：Leaflet 負責顯示，CARTO 負責把地圖給我。這個理解在 prototype 階段沒有問題，但它把背後幾個不同責任混成了一件事。
+真正去追整個流程後，我才理解：**瀏覽器其實從來沒有「下載一張完整地圖」。** 它下載的是很多個小 tile；這些 tile 又是從 OSM geographic data 經過 import、spatial query、projection 與 rendering 後產生的。
 
-當需求改成 self-hosting，真正要問的不是「要不要換一個 tile URL」，而是：
-
-1. 誰保存道路、行政區、POI 等地理資料？
-2. 誰把資料轉成使用者目前視窗所需的地圖圖磚？
-3. 前端如何根據縮放與位置取得圖磚？
-4. 搜尋地址與規劃路線，是否也需要一起自架？
-
-我後來會把整件事拆成資料、地圖呈現、地理查詢與路由四層，而不是把它們都叫做「地圖 API」。
-
-## 先把元件分清楚：每個服務做的事不一樣
-
-| 元件 | 我現在的理解 | 它不負責什麼 |
-| --- | --- | --- |
-| OpenStreetMap（OSM） | 開放的地理資料與協作社群，也是許多底圖資料的來源 | 不是前端地圖元件，也不是直接等同 tile server |
-| PostGIS | PostgreSQL 的空間資料能力；適合儲存、查詢與分析幾何資料 | 不會自動把資料畫成一張可滑動的地圖 |
-| Tile Server / renderer | 將資料依樣式產生 raster 或 vector tiles | 不處理地址文字搜尋，也不替應用程式選路 |
-| Leaflet | 瀏覽器端地圖 UI；管理 viewport、圖層、marker、popup 與互動 | 不提供道路或地圖資料 |
-| Nominatim | Geocoding / reverse geocoding，例如地址轉座標或座標反查地名 | 不做 turn-by-turn routing |
-| OSRM | 根據道路網路計算路徑、距離與預估時間 | 不提供一般底圖或地址資料庫 |
-
-這張表對我最重要的價值，是讓我在 debug 時先判斷問題屬於哪一層。例如 marker 沒出現，可能是 Leaflet 或座標格式；搜尋不到地址，才去看 geocoder；路徑不合理，則要檢查 routing engine 與道路資料，而不是回頭調 tile style。
-
-## Leaflet 和 XYZ Tiles：前端其實是在拼一張地圖
-
-Leaflet 不會「下載一張世界地圖」。使用者拖曳或縮放時，它會依照目前的中心點與 zoom level，向 tile server 請求一小組圖磚。
-
-常見的 URL 格式是：
+我現在會把整條 pipeline 拆成兩個階段：
 
 ```text
-/{z}/{x}/{y}.png
-```
+① Data Preparation
 
-其中：
+OpenStreetMap → .osm.pbf → Import → PostGIS → Geographic Data
 
-- `z` 是縮放層級。
-- `x` 是該層級中的橫向 tile index。
-- `y` 是縱向 tile index。
 
-當縮放層級增加一級，世界在每個方向都會被切得更細。也就是說，tile 數量大致會隨著 `2^z` 成長。這也讓我理解到：self-hosting 不只是把圖檔放到一個 web server；資料範圍、縮放層級、快取策略和 render 時機都會直接影響儲存空間與回應速度。
+② Runtime Map Request
 
-Leaflet 在這一層的工作很純粹：根據 view state 算出需要哪些 tile，發 request，把結果放到正確位置，再疊上我們自己的 route、vehicle marker 或 polygon layer。
-
-## 為什麼 Web Mercator 會一直出現
-
-我一開始看到 EPSG:3857、Web Mercator 和 latitude/longitude 時，覺得它們都是「座標系」。真正實作後才發現，這個區分會影響 tile 是否對得上。
-
-GPS、OSM API 和多數 application data 常用 WGS84 經緯度（EPSG:4326）。但網頁地圖普遍採用 Web Mercator（EPSG:3857）來安排平面圖磚。經緯度要先投影到平面座標，才方便用 `z/x/y` 規則切圖。
-
-簡化來看，資料流會像這樣：
-
-```text
-GPS / API: longitude, latitude (EPSG:4326)
-        ↓ projection
-Tile grid: x, y in Web Mercator (EPSG:3857)
+User opens / moves map
         ↓
-Leaflet assembles the requested tiles
+     Leaflet
+        ↓
+Viewport + Zoom
+        ↓
+Web Mercator
+        ↓
+Calculate XYZ Tiles
+        ↓
+HTTP GET /{z}/{x}/{y}.png
+        ↓
+    Tile Server
+        ↓
+Query geographic data + apply map style
+        ↓
+Render Raster Tile
+        ↓
+HTTP Response: PNG
+        ↓
+Leaflet arranges returned tiles
+        ↓
+Interactive Map
 ```
 
-這也提醒我，當資料看起來「在海上」或 marker 和底圖有明顯偏移時，不能只懷疑前端 CSS。要先檢查資料是經緯度、投影座標，還是經緯度順序被寫反；地理資料問題常常不是 UI 問題。
+理解這兩個階段後，我才真正知道 CARTO 原本位於整個 architecture 的哪一層。
 
-## PostGIS：不是為了取代 OSM，而是讓專案資料能做空間查詢
+## Step 1 — OSM Is the Geographic Source
 
-OSM 可以提供底圖與道路網路的原始資料，但 HINO 專案還有自己的 telemetry、車輛位置與營運相關資料。這些資料若只以一般欄位保存，很難回答像是「某台車是否進入指定區域」、「離某個 depot 最近的車是哪一台」或「這段 route 與特定行政區交疊多少」這類問題。
+OpenStreetMap 儲存的不是一張「地圖圖片」，而是 geographic features：
 
-PostGIS 讓 PostgreSQL 能理解 geometry 與 geography，也能建立 spatial index。我的理解不是「把所有 OSM 都放進 PostGIS 就完成了」，而是把專案真正需要查詢與分析的空間資料放到一個可控、可索引的資料層。
-
-例如，應用程式需要找出指定半徑內的車輛時，查詢的責任比較接近 PostGIS：
-
-```sql
-SELECT vehicle_id, recorded_at
-FROM vehicle_positions
-WHERE ST_DWithin(
-  position::geography,
-  ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography,
-  :radius_meters
-);
+```text
+road
+building
+river
+school
+administrative boundary
+place
 ```
 
-這和「把底圖顯示在 Leaflet 上」是不同路徑。前者是 application data query；後者是 map rendering。
+它們主要透過 Node、Way、Relation 描述。以道路來說，它不是一條已畫好顏色的線，而是由多個 geographic points 組成的 way，再搭配 tags：
 
-## Nominatim 和 OSRM：地址搜尋與路線規劃是兩個問題
+```text
+highway=primary
+name=忠孝西路
+lanes=4
+```
 
-另一個容易混淆的地方，是搜尋地點與規劃路線。
+因此：
 
-如果使用者輸入「台北車站」，系統需要把文字轉成候選地點與座標，這是 geocoding；如果地圖上已有兩個座標，系統要找出道路上合理的行駛路徑與 ETA，這是 routing。
+```text
+OSM Data ≠ Rendered Map
+
+OSM Data + Map Style → Rendered Map
+```
+
+專案中使用 Taiwan OSM snapshot，例如 `taiwan-260722.osm.pbf`。`.osm.pbf` 是壓縮的 geographic data binary format，不是瀏覽器可以直接顯示的圖檔。
+
+## Step 2 — Why Import OSM into PostGIS?
+
+`.osm.pbf` 很適合保存完整 dataset，但不適合每次 Web request 都直接掃描。假設 browser 需要 `zoom = 14, x = 13715, y = 7011`，Tile Server 真正需要知道的是：這一小塊 geographic bounding box 裡有哪些道路、建築物、河流與其他 features？每次從完整 `.osm.pbf` 掃描會非常沒效率，因此 OSM data 會先被 import 到 spatial database：
+
+```text
+PostgreSQL + PostGIS
+```
+
+PostGIS 讓 PostgreSQL 能理解 spatial geometry：
+
+```text
+Point
+LineString
+Polygon
+MultiPolygon
+```
+
+道路可以是 `LineString`、建築物可以是 `Polygon`、地點可以是 `Point`。Tile Server 之後便能做概念上像這樣的 spatial query：
+
+```text
+Find all geographic features
+inside this tile's bounding box
+```
+
+所以我現在會把兩者理解成不同角色：
+
+| 資料層 | 角色 |
+| --- | --- |
+| `.osm.pbf` | canonical geographic source / transport format |
+| PostGIS | runtime spatial storage and query layer |
+
+這個區分也適用在 HINO 的 telemetry data。OSM 提供底圖與道路網路；車輛位置、geofence、journey 與營運資料則是 application data，進 PostGIS 的目的是做可控的空間查詢，而不是取代 OSM。
+
+## Step 3 — The Browser Does Not Request “Taipei”
+
+當我在 Leaflet 打開台北地圖時，browser 不會 request `GET /map/taipei`，也不會 request `Give me the whole Taiwan map.`。真正發生的是一組 tile request：
+
+```text
+GET /tile/14/13714/7010.png
+GET /tile/14/13715/7010.png
+GET /tile/14/13716/7010.png
+
+GET /tile/14/13714/7011.png
+GET /tile/14/13715/7011.png
+GET /tile/14/13716/7011.png
+```
+
+Browser 只下載目前 viewport 需要的 tiles。這也是為什麼 Web Map 可以快速拖動：不是每次重新下載整張地圖，而是使用已可見的 tiles，再補上新進入 viewport 的部分。
+
+> **The browser never requests “a map.” It requests a set of XYZ tiles required by the current viewport. Leaflet then arranges those independent HTTP responses into what the user perceives as one continuous map.**
+
+## Step 4 — From Longitude / Latitude to XYZ
+
+Leaflet 知道 map center、viewport size 與 zoom level，例如：
+
+```text
+center: 25.0478, 121.517
+zoom: 14
+```
+
+但 Tile Server 使用的不是 longitude / latitude URL，而是：
+
+```text
+/{z}/{x}/{y}
+```
+
+中間需要完成：
+
+```text
+Longitude / Latitude
+        ↓
+Web Mercator Projection
+        ↓
+Normalized Map Coordinates
+        ↓
+XYZ Tile Coordinates
+```
+
+大部分 Web Maps 使用 EPSG:3857，也就是 Web Mercator。在 zoom level `z`：
+
+```text
+n = 2^z
+x = floor((longitude + 180) / 360 × 2^z)
+```
+
+Latitude 則不是 linear mapping，因為 Web Mercator 對 latitude 使用 nonlinear transformation。因此 `(latitude + 90) / 180` 不能直接拿來算 Web Map 的 Y tile。這也是我後來才理解，為什麼 Web Mercator 的 latitude 範圍大約限制在 `±85.0511°`，而不是完整的 `±90°`。
+
+## Step 5 — What Does Zoom Actually Mean?
+
+XYZ Tile Scheme 中：
+
+```text
+z = zoom level
+x = horizontal tile index
+y = vertical tile index
+```
+
+每增加一層 zoom，每一個 axis 的 tile 數量都會乘以 2：
+
+```text
+z = 0 → 1 × 1
+z = 1 → 2 × 2
+z = 2 → 4 × 4
+```
+
+一般化來說：
+
+```text
+tiles per axis = 2^z
+theoretical tile count = 4^z
+```
+
+所以 zoom 越高，每個 tile 覆蓋的 geographic area 越小，detail 越高。Raster tile 很常是 `256 × 256 px`；Leaflet 就能根據 viewport、tile size 與中心點，算出當前畫面需要哪些 tiles。
+
+## Step 6 — What Happens Inside the Tile Server?
+
+收到 `/z/x/y` 後，Tile Server 先把 tile coordinate 轉回 geographic bounding box，再取得這個範圍裡需要的 objects：
+
+```text
+z/x/y
+↓
+Tile geographic extent
+↓
+Spatial query
+↓
+PostGIS
+↓
+roads / buildings / water / boundaries / labels
+```
+
+但這些 data 還不是地圖圖片。下一步還要套用 map style，例如 motorway 的寬度與顏色、water 的樣式、building 的填色、place label 的 font size。最後 renderer 才把：
+
+```text
+Geographic Data + Map Style
+↓
+256 × 256 PNG
+```
+
+轉成 HTTP response：
+
+```http
+HTTP/1.1 200 OK
+Content-Type: image/png
+```
+
+## Step 7 — One HTTP Response Is Not the Map
+
+一個 `256 × 256` tile 通常只佔螢幕的一小部分。假設畫面需要 4 columns × 3 rows，browser 可能需要 12 個獨立 request；Leaflet 再按照 `z / x / y` 把它們放到正確位置：
+
+```text
+┌────────┬────────┬────────┬────────┐
+│ Tile A │ Tile B │ Tile C │ Tile D │
+├────────┼────────┼────────┼────────┤
+│ Tile E │ Tile F │ Tile G │ Tile H │
+├────────┼────────┼────────┼────────┤
+│ Tile I │ Tile J │ Tile K │ Tile L │
+└────────┴────────┴────────┴────────┘
+```
+
+因為相鄰 tile 的邊界是連續的，使用者最後看到的是一張完整地圖，而不是很多張圖片：
+
+```text
+User opens map
+      ↓
+Leaflet knows viewport
+      ↓
+Projection
+      ↓
+Determine visible XYZ tiles
+      ↓
+Multiple HTTP GET requests
+      ↓
+Tile Server
+      ↓
+Multiple PNG responses
+      ↓
+Leaflet positions every tile
+      ↓
+One continuous map
+```
+
+## Step 8 — What Happens When I Drag the Map?
+
+當使用者拖動地圖，Leaflet 不需要重新取得所有東西。原本仍在畫面中的 tile 可以繼續使用，只有新進入 viewport 的區域需要 request：
+
+```text
+Before
+
+A B C
+D E F
+G H I
+
+往右拖後
+
+B C J
+E F K
+H I L
+```
+
+`B C / E F / H I` 已經存在，只需要 request `J / K / L`。Browser cache 或 Tile Cache 還能進一步減少重複 request 與 rendering；這是 tile-based Web Map 能流暢 pan 的重要原因之一。
+
+## Step 9 — Tile Cache and Pre-generated Tiles
+
+我一開始以為 Tile Server 每次收到 `GET /z/x/y` 都一定會 query PostGIS 再 render。後來才發現，實際架構不一定如此：
+
+```text
+Browser
+↓
+Tile Server
+↓
+Cache hit?
+↙     ↘
+HIT     MISS
+ ↓        ↓
+Return    PostGIS → Render → Cache → Return
+Tile
+```
+
+如果 tile 已經 render 過，服務可以直接回傳 cached tile；只有 cache miss 才需要 query、render 與 cache。若 geographic data 很少改變，也可以先把 tiles pre-render。高 zoom level 的 tile 數量會隨 `4^z` 快速增加，因此才會出現 MBTiles、PMTiles 這類 tile archive formats，把大量 tiles 放到較方便管理的 single archive 中。
+
+```text
+.osm.pbf
+→ source geographic data
+
+PostGIS
+→ spatial query layer
+
+MBTiles / PMTiles
+→ prepared tile archive
+```
+
+## Step 10 — Basemap and Application Data Are Different Layers
+
+Leaflet 顯示出來的東西，不一定全部來自 Tile Server。Road、building、river、administrative boundary 等 basemap 可能來自 raster tiles；但 HINO application 自己的 vehicle marker、journey route、telemetry point、event marker、geofence 通常是另外一層。
+
+```text
+              Leaflet
+                 │
+       ┌─────────┴─────────┐
+       │                   │
+   Base Map             App Layer
+       │                   │
+XYZ Raster Tiles      Marker / Polyline / Polygon / Popup
+```
+
+`L.tileLayer(...)` 顯示 OSM basemap，而 `L.marker(...)`、`L.polyline(...)`、`L.polygon(...)` 是 application-specific data。這也讓我理解為什麼換掉 CARTO 後，車輛 marker、journey polyline 等 application logic 並不需要全部重寫；我們真正替換的是 basemap provider。
+
+## Nominatim and OSRM Are Related, but Different
+
+同一份 OSM-derived data 可以被不同 infrastructure 使用，但責任不同。地址文字轉座標或座標反查地名是 geocoding，較接近 Nominatim；從 origin 和 destination 找到合理道路路徑、距離與 ETA 則是 routing，較接近 OSRM：
 
 ```text
 "台北車站" ──→ Nominatim ──→ { latitude, longitude }
@@ -128,44 +357,76 @@ WHERE ST_DWithin(
 origin + destination ──→ OSRM ──→ geometry, distance, duration, steps
 ```
 
-我以前會把兩者都視為「地圖服務」。現在會把 Nominatim 想成地名與座標之間的查詢服務，而 OSRM 是以道路網路做圖搜尋與成本計算的引擎。它們都可能使用 OSM 資料，但輸出的產品完全不同。
+它們都不是 basemap tile service。這個區分讓我在 debug 時能先判斷問題屬於哪一層：搜尋不到地址看 geocoder，路徑不合理看 routing engine，底圖不見才回頭看 tile URL、renderer 或 cache。
 
-## Self-hosting 的重點其實是 data flow，而不只是 Docker
+## The Complete Mental Model
 
-Docker 對這件事很有幫助，因為它可以把資料庫、tile renderer、geocoder 或 routing engine 的相依環境包起來。不過我在實作時學到，container 能正常啟動只是第一步。
-
-我現在會用下面的順序思考 self-hosted stack：
-
-1. **資料來源與範圍**：要匯入哪個區域的 OSM extract？資料更新頻率是什麼？
-2. **資料處理**：哪些資料需要進 PostGIS，哪些交給 routing engine 建索引，哪些會被轉成 tiles？
-3. **服務邊界**：tile、geocoding、routing 是否要分開部署與監控？
-4. **前端整合**：Leaflet 的 tile URL、attribution、CORS 與 fallback 行為是否正確？
-5. **營運問題**：快取、磁碟、記憶體、資料更新與 observability 要怎麼安排？
-
-這個順序讓我不會因為「已經有 Docker Compose」就過早認定問題解完。若 tiles 很慢，可能是 render 或 cache；若 route 回傳空結果，可能是資料範圍、profile 或預處理；若搜尋沒結果，也未必是 Leaflet 的錯。
-
-## 我目前整理出的整體架構
-
-以車聯網應用來看，我會把概念圖整理成下面這樣：
+最後我會把整條流程畫成：
 
 ```text
-                         OSM regional extract
-                           │        │        │
-                           │        │        └──→ OSRM ──→ route / ETA
-                           │        └──────────→ Nominatim ──→ search / reverse geocode
-                           └───────────────────→ tile renderer ──→ XYZ tiles
+                      DATA PREPARATION
 
-Project telemetry / operational data ──→ PostGIS ──→ spatial query / API
+OpenStreetMap → .osm.pbf → Import → PostGIS → Geographic Features
 
-XYZ tiles + project API + route geometry ──→ Leaflet ──→ browser map UI
+
+                         ↓
+
+
+                       RUNTIME
+
+User opens / pans / zooms map
+            ↓
+Leaflet (center + zoom + viewport)
+            ↓
+Web Mercator
+            ↓
+Calculate XYZ Tiles
+            ↓
+Multiple HTTP GET Requests
+            ↓
+Tile Server
+       ↙           ↘
+Cache Hit       Cache Miss
+   ↓                ↓
+Return         PostGIS Query → Map Style → Render → Cache
+   └────────────────┬────────────────┘
+                    ↓
+                PNG Tiles
+                    ↓
+              HTTP Responses
+                    ↓
+                 Leaflet
+                    ↓
+          Arrange Tiles + Application Layers
+                    ↓
+            Interactive Web Map
 ```
 
-這不是唯一的 production architecture，也不是每個服務都必須自架。但它幫助我在專案中回答一個更清楚的問題：我們是在替換哪個外部依賴？是底圖供應商、地址查詢、路線引擎，還是整個資料與呈現流程？
+## Where CARTO Was in This Pipeline
 
-## 從這次實作帶走的理解
+理解完整 pipeline 後，再回頭看原本的 CARTO architecture 就簡單很多。
 
-這次需求讓我重新認識到，Web Map 不是一個 API endpoint，而是一串不同格式與不同責任的資料流。Leaflet 是 UI，XYZ tiles 是地圖呈現方式，OSM 是重要資料來源，PostGIS 是專案空間資料層，Nominatim 負責位置名稱查詢，OSRM 負責路徑計算。
+以前：
 
-我一開始只是想知道「怎麼不用 CARTO 還能有地圖」，最後學到的是：只有把每個元件的 input、output 與 failure mode 分開看，self-hosting 才不會變成把一大堆 container 疊在一起。
+```text
+Leaflet → XYZ HTTP Request → CARTO → Rendered Tiles → Leaflet
+```
+
+Self-hosted 之後：
+
+```text
+Leaflet → XYZ HTTP Request → Our Tile Server → Our OSM-derived Map Data → Rendered Tiles → Leaflet
+```
+
+前端的核心邏輯其實沒有根本性變化。改變的是：
+
+```text
+Who answers the tile HTTP request?
+
+Before: CARTO
+After: our own infrastructure
+```
+
+這也是我這次最大的理解之一。Self-hosting map service 並不是自己寫一套 Leaflet，而是把原本位於 Leaflet 後面的 map-serving layer，從 third-party provider 移回自己的 infrastructure。
 
 下一步我想繼續補上的，不是更多名詞，而是把這些服務的 health check、資料更新流程與快取策略真的接進專案，讓這個理解能落到可維護的工程實作上。
