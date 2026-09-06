@@ -184,3 +184,9 @@ body { background: radial-gradient(circle at 82% 5%, #142541 0, transparent 28%)
 .note-visual.map { display: grid; place-content: center; gap: 8px; background: linear-gradient(145deg, #11375c, #1a6084); color: #d9f1ff; font-size: .65rem; font-weight: 800; text-align: center; letter-spacing: .08em; }
 .map i { font-size: .48rem; font-style: normal; }
 .map span { width: 46px; height: 2px; margin: 1px auto 0; background: #74cbdf; }
+.project-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 9px; }
+.project-title-row h3 { margin-right: auto; }
+.example-badge { flex: 0 0 auto; padding: 4px 7px; border: 1px solid #49617f; border-radius: 999px; color: #9fb1c8; font-size: .61rem; font-weight: 700; line-height: 1; white-space: nowrap; }
+.profile-details { gap: 9px; }
+.profile-details li { display: grid; grid-template-columns: 20px minmax(0, 1fr); align-items: start; padding: 9px 11px; border: 1px solid #2b3e5c; border-radius: 9px; background: #0d182a; line-height: 1.45; }
+.profile-details span { width: auto; }

@@ -11,7 +11,7 @@ const { project } = Astro.props;
     {project.visual === "inspection" && <><div class="inspect-bar"></div><div class="inspect-image"><i></i></div><div class="inspect-list"><span></span><span></span><span></span></div></>}
   </div>
   <div class="project-content">
-    <h3>{project.title}</h3>
+    <div class="project-title-row"><h3>{project.title}</h3>{project.isExample && <span class="example-badge">範例專案</span>}</div>
     <p>{project.description}</p>
     <ul class="tag-list" aria-label={`${project.title} 使用技術`}>{project.tags.map((tag) => <li>{tag}</li>)}</ul>
     <div class="project-links">

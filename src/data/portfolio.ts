@@ -3,6 +3,7 @@ export type Project = {
   description: string;
   tags: string[];
   visual: "vehicle" | "fleet" | "inspection";
+  isExample?: boolean;
   href: string;
   githubHref: string;
 };
@@ -33,6 +34,7 @@ export const projects: Project[] = [
     description: "運用真實車輛影像資料集，建立可辨識 0°、90°、180° 與 270° 方位的車輛影像分類流程。",
     tags: ["PyTorch", "Computer Vision", "ResNet18"],
     visual: "vehicle",
+    isExample: true,
     href: "#",
     githubHref: "#",
   },
@@ -41,6 +43,7 @@ export const projects: Project[] = [
     description: "整合空間資料、路線分析與 AI 助理的車隊遙測分析平台，協助提升車隊營運效率與決策品質。",
     tags: ["LangChain", "PostgreSQL", "OSRM"],
     visual: "fleet",
+    isExample: true,
     href: "#",
     githubHref: "#",
   },
@@ -49,6 +52,7 @@ export const projects: Project[] = [
     description: "結合影像品質檢查、車輛損傷分析與營運流程的 AI 輔助驗車系統。",
     tags: ["Computer Vision", "Node.js", "Vue"],
     visual: "inspection",
+    isExample: true,
     href: "#",
     githubHref: "#",
   },
