@@ -1,18 +1,5 @@
 ---
-import About from "../components/About.astro";
-import Footer from "../components/Footer.astro";
-import Header from "../components/Header.astro";
-import Notes from "../components/Notes.astro";
-import Projects from "../components/Projects.astro";
-import BaseLayout from "../layouts/BaseLayout.astro";
+import HomePage from '../views/HomePage.astro';
 ---
 
-<BaseLayout title="YunHsi Lee | AI 與軟體工程作品集" description="YunHsi Lee 的個人作品集，收錄 AI、電腦視覺、軟體工程與資料系統相關專案。">
-  <Header />
-  <main id="top">
-    <Projects />
-    <Notes />
-    <About />
-  </main>
-  <Footer />
-</BaseLayout>
+<HomePage lang="zh-tw" />

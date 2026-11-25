@@ -1,16 +1,19 @@
 ---
-title: "從 OSM 到 Browser：我如何理解 Web Mapping Stack"
-description: "從一次 CARTO self-hosting 需求出發，追完整條 OSM → PostGIS → Tile Server → XYZ Tiles → HTTP → Leaflet 的 Web Map data flow。"
-category: "GIS / Web Map"
-visual: "map"
+lang: 'zh-tw'
+visibility: 'public'
+translationKey: 'web-map-stack-from-carto-to-self-hosted'
+title: '從 OSM 到 Browser：我如何理解 Web Mapping Stack'
+description: '從一次 CARTO self-hosting 需求出發，追完整條 OSM → PostGIS → Tile Server → XYZ Tiles → HTTP → Leaflet 的 Web Map data flow。'
+category: 'GIS / Web Map'
+visual: 'map'
 pubDate: 2026-09-06
-tags: ["GIS", "OpenStreetMap", "Leaflet", "PostGIS", "Docker", "Web Map"]
-slug: "web-map-stack-from-carto-to-self-hosted"
+tags: ['GIS', 'OpenStreetMap', 'Leaflet', 'PostGIS', 'Docker', 'Web Map']
+slug: 'web-map-stack-from-carto-to-self-hosted'
 order: 4
 draft: false
 ---
 
-最近在 HINO 車聯網專案中，我遇到一個原本看起來很單純的需求：
+學習 Web Map 的 self-hosting 時，我遇到一個原本看起來很單純的需求：
 
 > Map service needs to be self-hosted.
 
@@ -30,7 +33,7 @@ Leaflet → CARTO → 地圖出現
 
 ## From OSM Data to a Map in the Browser
 
-真正去追整個流程後，我才理解：**瀏覽器其實從來沒有「下載一張完整地圖」。** 它下載的是很多個小 tile。在我們採用的 raster tile stack 中，OSM data 會先經過 import 與 preprocessing；需要動態 rendering 時，Tile Server 可以查詢 spatial database、套用 style 並產生 tile，而已快取或預先產生的 tile 則可以直接回傳。
+真正去追整個流程後，我才理解：**瀏覽器其實從來沒有「下載一張完整地圖」。** 它下載的是很多個小 tile。在這篇討論的 raster tile stack 中，OSM data 會先經過 import 與 preprocessing；需要動態 rendering 時，Tile Server 可以查詢 spatial database、套用 style 並產生 tile，而已快取或預先產生的 tile 則可以直接回傳。
 
 我現在會把整條 pipeline 拆成兩個階段：
 
@@ -98,7 +101,7 @@ OSM Data ≠ Rendered Map
 OSM Data + Map Style → Rendered Map
 ```
 
-專案中使用 Taiwan OSM snapshot，例如 `taiwan-260722.osm.pbf`。`.osm.pbf` 是壓縮的 geographic data binary format，不是瀏覽器可以直接顯示的圖檔。
+以 Taiwan OSM snapshot 為例，例如 `taiwan-260722.osm.pbf`。`.osm.pbf` 是壓縮的 geographic data binary format，不是瀏覽器可以直接顯示的圖檔。
 
 ## Step 2 — Why Import OSM into PostGIS?
 
@@ -126,10 +129,10 @@ inside this tile's bounding box
 
 所以我現在會把兩者理解成不同角色：
 
-| 資料層 | 角色 |
-| --- | --- |
+| 資料層     | 角色                                           |
+| ---------- | ---------------------------------------------- |
 | `.osm.pbf` | canonical geographic source / transport format |
-| PostGIS | runtime spatial storage and query layer |
+| PostGIS    | runtime spatial storage and query layer        |
 
 這個區分也讓我開始把 basemap data 和 application data 分開思考。OSM 提供道路、行政區與底圖資料；車輛位置、geofence、journey 與 telemetry 則屬於產品自己的 application data。兩者最後可以一起呈現在 Leaflet 上，但資料來源與處理流程並不相同。
 
@@ -333,7 +336,7 @@ MBTiles / PMTiles
 
 ## Basemap and Application Data Are Different Layers
 
-Leaflet 顯示出來的東西，不一定全部來自 Tile Server。Road、building、river、administrative boundary 等 basemap 可能來自 raster tiles；但 HINO application 自己的 vehicle marker、journey route、telemetry point、event marker、geofence 通常是另外一層。
+Leaflet 顯示出來的東西，不一定全部來自 Tile Server。Road、building、river、administrative boundary 等 basemap 可能來自 raster tiles；但 應用程式自己的 vehicle marker、journey route、telemetry point、event marker、geofence 通常是另外一層。
 
 ```text
               Leaflet
@@ -404,7 +407,7 @@ Return         PostGIS Query → Map Style → Render → Cache
 
 ## Where CARTO Was in This Pipeline
 
-理解完整 pipeline 後，再回頭看原本的 CARTO architecture 就簡單很多。
+理解完整 pipeline 後，再回頭看原本的 CARTO basemap architecture 就簡單很多。
 
 以前：
 

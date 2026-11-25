@@ -1,8 +1,11 @@
 ---
-title: "從 GeoTIFF 到高程資料回填"
-description: "探討如何運用網格高程資料，讓空間分析與路線資訊更加完整。"
-category: "資料系統"
-visual: "terrain"
+lang: 'zh-tw'
+visibility: 'public'
+translationKey: 'geotiff-elevation'
+title: '從 GeoTIFF 到高程資料回填'
+description: '探討如何運用網格高程資料，讓空間分析與路線資訊更加完整。'
+category: '資料系統'
+visual: 'terrain'
 order: 3
 draft: false
 ---

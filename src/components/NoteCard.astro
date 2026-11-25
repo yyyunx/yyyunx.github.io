@@ -1,22 +1,31 @@
 ---
-import type { CollectionEntry } from "astro:content";
-
-type Props = { note: CollectionEntry<"notes"> };
-const { note } = Astro.props;
-const { title, description, category, visual } = note.data;
+import type { CollectionEntry } from 'astro:content';
+import { entryUrl } from '../lib/content';
+import type { Locale } from '../lib/i18n';
+const { note, lang } = Astro.props as {
+  note: CollectionEntry<'notes'>;
+  lang: Locale;
+};
 ---
 
-<article class="note-card">
-  <div class:list={["note-visual", visual]} aria-hidden="true">
-    {visual === "exif" && <><b>EXIF</b><i>ORIENTATION</i><span></span></>}
-    {visual === "runnable" && <><span>Runnable</span><i>LLM</i><b>Output</b></>}
-    {visual === "terrain" && <><i></i><b></b><span></span></>}
-    {visual === "map" && <><b>OSM</b><i>WEB MAP</i><span></span></>}
+<article class="note-row">
+  <div class="note-meta">
+    <span>{note.data.category}</span>
+    {note.data.pubDate && (
+      <time datetime={note.data.pubDate.toISOString()}>
+        {new Intl.DateTimeFormat(lang === 'en' ? 'en' : 'zh-TW', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          timeZone: 'Asia/Taipei',
+        }).format(note.data.pubDate)}
+      </time>
+    )}
   </div>
-  <div class="note-content">
-    <p class="note-category">{category}</p>
-    <h3>{title}</h3>
-    <p>{description}</p>
-    <a href={`/notes/${note.id}/`}>閱讀筆記 <span aria-hidden="true">→</span></a>
+  <div>
+    <h3>
+      <a href={entryUrl(note)}>{note.data.title}</a>
+    </h3>
+    <p>{note.data.description}</p>
   </div>
 </article>

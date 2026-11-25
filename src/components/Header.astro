@@ -1,20 +1,96 @@
 ---
-import { profile } from "../data/portfolio";
+import { profile } from '../data/portfolio';
+import { pathFor, ui, type Locale } from '../lib/i18n';
+interface Props {
+  lang: Locale;
+  alternate: string;
+}
+const { lang, alternate } = Astro.props;
+const t = ui[lang];
+const nav = ['projects', 'notes', 'research', 'about'] as const;
+const current = Astro.url.pathname;
 ---
 
 <header class="site-header">
   <div class="shell header-inner">
-    <a class="brand" href="/" aria-label={`${profile.name} 首頁`}>{profile.name}</a>
-    <nav class="main-nav" aria-label="主要導覽">
-      <a href="/#projects">PROJECTS</a>
-      <a href="/#notes">NOTES</a>
-      <a href="/#about">ABOUT ME</a>
-      <!-- TODO: Link this to the final CV document once public/cv.pdf is available. -->
-      <a href="/cv.pdf">CV</a>
-    </nav>
-    <a class="button button-small contact-button" href="/#contact">
-      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3.5 6.5h17v11h-17zM4 7l8 6 8-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" /></svg>
-      聯絡我
+    <a
+      class="brand"
+      href={pathFor(lang)}
+      aria-label={`${profile.name} — ${t.home}`}
+    >
+      YunHsi Lee
+      <span class="brand-dot" aria-hidden="true">
+        .
+      </span>
     </a>
+    <nav
+      aria-label={lang === 'en' ? 'Main navigation' : '主要導覽'}
+      class="main-nav"
+    >
+      {nav.map((item) => (
+        <a
+          href={pathFor(lang, item)}
+          aria-current={
+            current.startsWith(pathFor(lang, item)) ? 'page' : undefined
+          }
+        >
+          {t[item]}
+        </a>
+      ))}
+    </nav>
+    <div class="header-tools">
+      <a
+        class="language-switch"
+        href={alternate}
+        lang={lang === 'en' ? 'zh-Hant' : 'en'}
+        hreflang={lang === 'en' ? 'zh-Hant' : 'en'}
+        aria-label={lang === 'en' ? '切換為繁體中文' : 'Switch to English'}
+      >
+        {lang === 'en' ? '繁中' : 'EN'}
+      </a>
+      <label class="theme-control">
+        <span class="sr-only">{t.theme}</span>
+        <select id="theme-select" aria-label={t.theme}>
+          <option value="system">{t.system}</option>
+          <option value="light">{t.light}</option>
+          <option value="dark">{t.dark}</option>
+        </select>
+      </label>
+    </div>
   </div>
 </header>
+<script>
+  const select = document.querySelector<HTMLSelectElement>('#theme-select');
+  const preference = window.matchMedia('(prefers-color-scheme: dark)');
+  let theme = 'system';
+  try {
+    theme = localStorage.getItem('portfolio-theme') || 'system';
+  } catch {
+    /* Storage may be disabled. */
+  }
+  if (!['system', 'light', 'dark'].includes(theme)) theme = 'system';
+  if (select) select.value = theme;
+  const apply = () =>
+    (document.documentElement.dataset.theme =
+      theme === 'system' ? (preference.matches ? 'dark' : 'light') : theme);
+  select?.addEventListener('change', () => {
+    theme = select.value;
+    try {
+      localStorage.setItem('portfolio-theme', theme);
+    } catch {
+      /* Theme works for this page. */
+    }
+    apply();
+  });
+  preference.addEventListener('change', apply);
+  window.addEventListener('storage', (event) => {
+    if (event.key !== 'portfolio-theme') return;
+    theme =
+      event.newValue && ['light', 'dark'].includes(event.newValue)
+        ? event.newValue
+        : 'system';
+    if (select) select.value = theme;
+    apply();
+  });
+  apply();
+</script>

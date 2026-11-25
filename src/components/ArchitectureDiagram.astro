@@ -1,0 +1,65 @@
+---
+import type { Locale } from '../lib/i18n';
+interface Props {
+  kind: 'groupctl' | 'sharpness' | 'inspection' | 'systems';
+  lang: Locale;
+}
+const { kind, lang } = Astro.props;
+const en = lang === 'en';
+const diagrams = {
+  groupctl: {
+    title: en ? 'A Git-based collaboration flow' : '以 Git 為基礎的協作流程',
+    steps: [
+      'Personal branches',
+      'Publish / Review',
+      'Integrate / Test',
+      'Canonical branch',
+    ],
+    note: en
+      ? 'Review and integration are separate actions. Final publication requires human confirmation.'
+      : '審查通過與整合是分開的操作，最終成果發布另需真人確認。',
+  },
+  sharpness: {
+    title: en ? 'Measure first, decide separately' : '先量測，再獨立做判斷',
+    steps: [
+      'Image / EXIF',
+      'Grayscale',
+      'Laplacian / Sobel',
+      'Scores / Local grid',
+    ],
+    note: en
+      ? 'CLI, Python library, and optional HTTP UI share the measurement core. Heatmaps are relative within one image.'
+      : 'CLI、Python library 與選用的 HTTP 介面共用量測核心。熱圖只表達單張影像內的相對值。',
+  },
+  inspection: {
+    title: en ? 'The inspection prototype' : '驗車原型的主要流程',
+    steps: [
+      'React frontend',
+      'Express API',
+      'Python AI service',
+      'Human review',
+    ],
+    note: en
+      ? 'The backend stores cases in SQLite and sends configured LINE notifications. Damage analysis depends on external models and optional pretrained Qwen. Orientation and dirt inference are not integrated.'
+      : '後端以 SQLite 保存案件並發送已設定的 LINE 通知。車損分析依賴外部模型與選用的預訓練 Qwen；旋轉分類與髒污推論尚未接入。',
+  },
+  systems: {
+    title: en ? 'Two separate OS experiments' : '兩組獨立的 OS 實驗',
+    steps: ['TCP clients', 'Blocking / epoll', 'Observe FD / threads'],
+    note: en
+      ? 'A separate local request simulator compares an unbounded queue with a bounded queue, fixed workers, timed backpressure, and rejection. It is not part of the TCP server pipeline.'
+      : '另一個本機 request simulator 比較無上限佇列與固定 workers、有限佇列、限時回壓及拒絕策略；它不是 TCP server 的後續處理管線。',
+  },
+};
+const d = diagrams[kind];
+---
+
+<figure class="architecture">
+  <figcaption>{d.title}</figcaption>
+  <ol class="flow-steps">
+    {d.steps.map((step) => (
+      <li>{step}</li>
+    ))}
+  </ol>
+  <p>{d.note}</p>
+</figure>

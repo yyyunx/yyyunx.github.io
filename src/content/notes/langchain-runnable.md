@@ -1,8 +1,11 @@
 ---
-title: "理解 LangChain Runnable"
-description: "認識如何透過 Runnable sequence，組合出更穩定、可預期的 AI 應用流程。"
-category: "AI 工程"
-visual: "runnable"
+lang: 'zh-tw'
+visibility: 'public'
+translationKey: 'langchain-runnable'
+title: '理解 LangChain Runnable'
+description: '認識如何透過 Runnable sequence，組合出更穩定、可預期的 AI 應用流程。'
+category: 'AI 工程'
+visual: 'runnable'
 order: 2
 draft: false
 ---

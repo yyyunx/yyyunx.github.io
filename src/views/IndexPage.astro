@@ -1,0 +1,273 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import NoteCard from '../components/NoteCard.astro';
+import LearningRoadmap from '../components/LearningRoadmap.astro';
+import { entries } from '../lib/content';
+import { profile } from '../data/portfolio';
+import { categories, pathFor, otherLocale, ui, type Locale } from '../lib/i18n';
+interface Props {
+  lang: Locale;
+  page: 'projects' | 'notes' | 'about' | 'research';
+}
+const { lang, page } = Astro.props;
+const en = lang === 'en';
+const t = ui[lang];
+const projects = await entries('projects', lang);
+const notes = await entries('notes', lang);
+const availableCategories = Object.keys(categories).filter((category) =>
+  projects.some((p) => p.data.category === category),
+) as (keyof typeof categories)[];
+const intros = {
+  projects: en
+    ? 'Projects in software, computer vision, and systems. A record of what works, the choices behind it, and what still needs work.'
+    : '整理軟體、電腦視覺與系統相關作品。記錄做了什麼、為什麼這樣做，以及還有哪些地方需要改進。',
+  notes: en
+    ? 'Notes from working through unfamiliar ideas: image pipelines, AI applications, and data systems. The learning directions below are plans for future exploration.'
+    : '整理實作中遇到的問題與觀念，從影像管線、AI 應用到資料系統。下方另列未來想逐步探索的硬體學習方向。',
+  about: en
+    ? 'A Computer Science student learning through coursework, projects, and experiments.'
+    : '透過課程、專案與實驗，持續累積理解與實作經驗的資工學生。',
+  research: en
+    ? 'Questions I want to explore at the intersection of hardware, systems, and applied AI.'
+    : '目前關注硬體、系統與人工智慧應用交會處的問題，逐步建立相關基礎。',
+};
+---
+
+<BaseLayout
+  title={`${t[page]} — YunHsi Lee`}
+  description={intros[page]}
+  lang={lang}
+  alternate={pathFor(otherLocale(lang), page)}
+>
+  <div class="shell page-shell">
+    <header class="page-heading">
+      <p class="eyebrow">
+        {page === 'research' ? 'RESEARCH INTERESTS' : page.toUpperCase()}
+      </p>
+      <h1>
+        {page === 'notes'
+          ? en
+            ? 'A learning notebook.'
+            : '邊做，邊記下來。'
+          : page === 'projects'
+            ? en
+              ? 'Things I’ve worked on.'
+              : '在實作裡理解問題。'
+            : page === 'about'
+              ? en
+                ? 'Hello, I’m YunHsi.'
+                : '你好，我是 YunHsi。'
+              : en
+                ? 'Questions to explore.'
+                : '想繼續探索的問題。'}
+      </h1>
+      <p>{intros[page]}</p>
+    </header>
+    {page === 'projects' && (
+      <>
+        <div
+          class="project-filters"
+          aria-label={en ? 'Filter projects by category' : '依分類篩選專案'}
+          hidden
+        >
+          <button type="button" data-filter="all" aria-pressed="true">
+            {en ? 'All' : '全部'}
+          </button>
+          {availableCategories.map((category) => (
+            <button type="button" data-filter={category} aria-pressed="false">
+              {categories[category][lang]}
+            </button>
+          ))}
+        </div>
+        <p
+          id="filter-count"
+          class="filter-count"
+          role="status"
+          aria-live="polite"
+        ></p>
+        {(['featured', 'other', 'coursework'] as const).map((tier) => {
+          const group = projects.filter((p) => p.data.tier === tier);
+          return (
+            group.length > 0 && (
+              <section class="project-group" data-project-group>
+                <h2>{t[tier]}</h2>
+                <div class="project-grid">
+                  {group.map((project) => (
+                    <div data-project-category={project.data.category}>
+                      <ProjectCard
+                        project={project}
+                        lang={lang}
+                        compact={tier === 'coursework'}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )
+          );
+        })}
+      </>
+    )}
+    {page === 'notes' && (
+      <>
+        <div class="note-list">
+          {notes.length ? (
+            notes.map((note) => <NoteCard note={note} lang={lang} />)
+          ) : (
+            <p>{t.noNotes}</p>
+          )}
+        </div>
+        <LearningRoadmap lang={lang} />
+      </>
+    )}
+    {page === 'about' && (
+      <div class="about-content">
+        <section class="about-block">
+          <h2>{en ? 'Background' : '學習背景'}</h2>
+          <div>
+            <p>{profile.education[lang]}</p>
+            <p>
+              {en
+                ? 'My current practical experience is in software and AI applications. I’m interested in moving toward digital IC and hardware, starting with digital logic, architecture, and RTL foundations.'
+                : '目前的實作以軟體開發與 AI 應用為主，也對數位 IC 與硬體相關方向有興趣，希望從數位邏輯、電腦架構與 RTL 基礎逐步深入。'}
+            </p>
+          </div>
+        </section>
+        <section class="about-block">
+          <h2>{en ? 'Project experience' : '專案經驗'}</h2>
+          <div>
+            <p>
+              {en
+                ? 'The project archive covers Git collaboration tooling, classical image sharpness measurements, a vehicle-inspection hackathon prototype, and Linux systems experiments.'
+                : '作品涵蓋 Git 協作工具、傳統影像清晰度量測、驗車黑客松原型，以及 Linux 系統實驗。'}
+            </p>
+            <a class="text-link" href={pathFor(lang, 'projects')}>
+              {en
+                ? 'Read the projects and their limitations'
+                : '閱讀專案紀錄與實作限制'}
+            </a>
+          </div>
+        </section>
+        <section class="about-block">
+          <h2>{en ? 'Technologies in the work' : '專案中接觸的技術'}</h2>
+          <div class="experience-list">
+            <div>
+              <h3>{en ? 'Programming & development' : '程式語言與開發'}</h3>
+              <p>Python · C / C++ · TypeScript · JavaScript · Git</p>
+              <a href={pathFor(lang, 'projects/groupctl')}>groupctl</a>
+            </div>
+            <div>
+              <h3>Computer Vision & AI</h3>
+              <p>OpenCV · NumPy · FastAPI · React · Express</p>
+              <a href={pathFor(lang, 'projects/laplacian-blur-detector')}>
+                Laplacian Blur Detector
+              </a>
+            </div>
+            <div>
+              <h3>Systems programming</h3>
+              <p>Linux · TCP sockets · epoll · Mutex · Thread pools</p>
+              <a href={pathFor(lang, 'projects/os-presentation')}>
+                OS experiments
+              </a>
+            </div>
+            <div>
+              <h3>{en ? 'Coursework' : '課程實作'}</h3>
+              <p>
+                {en
+                  ? 'Operating Systems, Data Structures, Introduction to AI, Probability, and Web Programming.'
+                  : '作業系統、資料結構、人工智慧導論、機率與網頁程式設計。'}
+              </p>
+            </div>
+          </div>
+        </section>
+        <section class="about-block">
+          <h2>{t.contact}</h2>
+          <div class="contact-list">
+            <a href={`mailto:${profile.email}`}>{profile.email}</a>
+            <a href={profile.github}>github.com/yyyunx</a>
+          </div>
+        </section>
+        <LearningRoadmap lang={lang} />
+      </div>
+    )}
+    {page === 'research' && (
+      <div class="research-content">
+        <p class="research-note">
+          {en
+            ? 'This page currently records interests and learning directions. Public research outcomes will be added when there is work ready to share.'
+            : '目前先整理研究興趣與學習方向，之後有適合公開的研究成果，再逐步補上。'}
+        </p>
+        <div class="research-list">
+          <section>
+            <h2>Computer architecture & digital design</h2>
+            <p>
+              {en
+                ? 'Understanding how an instruction becomes computation: datapaths, control logic, memory, and the tradeoffs behind an implementation. RISC-V and FPGA are directions for future practice.'
+                : '想理解一條指令如何經過資料路徑、控制邏輯與記憶體成為實際運算，並透過 RISC-V 與 FPGA 練習探索設計取捨。'}
+            </p>
+          </section>
+          <section>
+            <h2>Post-quantum cryptography hardware</h2>
+            <p>
+              {en
+                ? 'Starting with modular arithmetic and NTT / INTT, then exploring how algorithm structure maps to hardware resource and data-movement constraints.'
+                : '從模運算與 NTT / INTT 開始，理解演算法結構如何對應到硬體資源與資料搬移的限制。'}
+            </p>
+          </section>
+          <section>
+            <h2>Computer vision & AI systems</h2>
+            <p>
+              {en
+                ? 'Image preprocessing, measurement reliability, and the boundary between a model prediction and an application decision. Public project notes describe the current experiments and their limits.'
+                : '關注影像前處理、量測可靠性，以及模型預測與應用決策之間的界線。現階段的實作與限制整理在公開專案紀錄中。'}
+            </p>
+            <a class="text-link" href={pathFor(lang, 'projects')}>
+              {t.allProjects}
+            </a>
+          </section>
+        </div>
+      </div>
+    )}
+  </div>
+</BaseLayout>
+<script>
+  const filters = document.querySelector<HTMLElement>('.project-filters');
+  const items = [
+    ...document.querySelectorAll<HTMLElement>('[data-project-category]'),
+  ];
+  if (filters) {
+    filters.hidden = false;
+    filters.addEventListener('click', (event) => {
+      const button = (event.target as HTMLElement).closest<HTMLButtonElement>(
+        'button[data-filter]',
+      );
+      if (!button) return;
+      filters
+        .querySelectorAll('button')
+        .forEach((item) =>
+          item.setAttribute('aria-pressed', String(item === button)),
+        );
+      items.forEach(
+        (item) =>
+          (item.hidden =
+            button.dataset.filter !== 'all' &&
+            item.dataset.projectCategory !== button.dataset.filter),
+      );
+      document
+        .querySelectorAll<HTMLElement>('[data-project-group]')
+        .forEach(
+          (group) =>
+            (group.hidden = ![
+              ...group.querySelectorAll<HTMLElement>('[data-project-category]'),
+            ].some((item) => !item.hidden)),
+        );
+      const count = document.querySelector('#filter-count');
+      if (count)
+        count.textContent =
+          document.documentElement.lang === 'en'
+            ? `${items.filter((i) => !i.hidden).length} ${items.filter((i) => !i.hidden).length === 1 ? 'project' : 'projects'}`
+            : `${items.filter((i) => !i.hidden).length} 個專案`;
+    });
+  }
+</script>

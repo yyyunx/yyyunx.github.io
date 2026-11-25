@@ -1,8 +1,11 @@
 ---
-title: "為什麼只有 EXIF Orientation 還不夠"
-description: "從實務角度解析影像方向中繼資料，以及電腦視覺管線仍需補上的檢查。"
-category: "電腦視覺"
-visual: "exif"
+lang: 'zh-tw'
+visibility: 'public'
+translationKey: 'exif-orientation'
+title: '為什麼只有 EXIF Orientation 還不夠'
+description: '從實務角度解析影像方向中繼資料，以及電腦視覺管線仍需補上的檢查。'
+category: '電腦視覺'
+visual: 'exif'
 order: 1
 draft: false
 ---

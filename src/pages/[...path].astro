@@ -1,0 +1,45 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import IndexPage from '../views/IndexPage.astro';
+import ArticlePage from '../views/ArticlePage.astro';
+import ErrorPage from '../views/ErrorPage.astro';
+import { isPublic } from '../lib/content';
+import { locales, type Locale } from '../lib/i18n';
+
+export async function getStaticPaths() {
+  const records = [
+    ...(await getCollection('projects')),
+    ...(await getCollection('notes')),
+  ].filter(isPublic);
+  const pages = locales.flatMap((lang) =>
+    ['projects', 'notes', 'research', 'about'].map((page) => ({
+      params: { path: `${lang === 'en' ? 'en/' : ''}${page}` },
+      props: { lang, page },
+    })),
+  );
+  return [
+    ...pages,
+    ...records.map((entry) => ({
+      params: {
+        path: `${entry.data.lang === 'en' ? 'en/' : ''}${entry.collection}/${entry.data.translationKey}`,
+      },
+      props: { lang: entry.data.lang, entry },
+    })),
+    { params: { path: 'en/404' }, props: { lang: 'en', page: '404' } },
+  ];
+}
+interface Props {
+  lang: Locale;
+  page?: 'projects' | 'notes' | 'research' | 'about' | '404';
+  entry?: CollectionEntry<'projects' | 'notes'>;
+}
+const { lang, page, entry } = Astro.props;
+---
+
+{entry ? (
+  <ArticlePage entry={entry} />
+) : page === '404' ? (
+  <ErrorPage lang={lang} />
+) : (
+  <IndexPage lang={lang} page={page!} />
+)}

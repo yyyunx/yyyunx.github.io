@@ -1,0 +1,26 @@
+---
+import { roadmap } from '../data/portfolio';
+import { ui, type Locale } from '../lib/i18n';
+const { lang } = Astro.props as { lang: Locale };
+---
+
+<section class="roadmap-section" aria-labelledby="roadmap-heading">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">LEARNING DIRECTIONS</p>
+      <h2 id="roadmap-heading">{ui[lang].roadmap}</h2>
+    </div>
+  </div>
+  <p class="section-intro">{ui[lang].roadmapDescription}</p>
+  <div class="roadmap-grid">
+    {roadmap.map((item) => (
+      <div>
+        <span class="small-label">
+          {lang === 'en' ? 'To explore' : '準備探索'}
+        </span>
+        <h3>{item.title}</h3>
+        <p>{item.detail[lang]}</p>
+      </div>
+    ))}
+  </div>
+</section>

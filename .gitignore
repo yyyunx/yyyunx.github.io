@@ -22,3 +22,13 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Local review material must never enter the public repository or build.
+.local/
+private/
+drafts/
+.env.*
+!.env.example
+test-results/
+playwright-report/
+.pnpm-store/

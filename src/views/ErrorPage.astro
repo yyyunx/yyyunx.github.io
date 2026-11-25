@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { pathFor, type Locale } from '../lib/i18n';
+const { lang } = Astro.props as { lang: Locale };
+const en = lang === 'en';
+---
+
+<BaseLayout
+  title="404 — YunHsi Lee"
+  description={en ? 'Page not found.' : '找不到這個頁面。'}
+  lang={lang}
+  alternate={en ? '/404.html' : '/en/404/'}
+  noindex
+>
+  <div class="shell error-page">
+    <p class="eyebrow">404 / PAGE NOT FOUND</p>
+    <h1>{en ? 'A page out of place.' : '這個頁面不在這裡。'}</h1>
+    <p>
+      {en
+        ? 'The address may have changed. You can find the projects and notes from the home page.'
+        : '網址可能已變更，可以從首頁繼續閱讀專案與筆記。'}
+    </p>
+    <a class="button" href={pathFor(lang)}>
+      {en ? 'Back to home' : '返回首頁'}
+    </a>
+  </div>
+</BaseLayout>

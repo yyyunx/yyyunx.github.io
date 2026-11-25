@@ -1,0 +1,89 @@
+{
+  "reviewed": "2026-11-25",
+  "projects": [
+    {
+      "repo": "groupctl-ai-collaboration",
+      "ref": "e927a211a58626817aaa29b75471d21d602649e2",
+      "license": "MIT",
+      "tier": "featured",
+      "status": "Maintained",
+      "sources": [
+        "README.md",
+        "docs/PROTOCOL_OVERVIEW.md",
+        "docs/LICENSING_REVIEW.md",
+        "groupctl/validation.py"
+      ]
+    },
+    {
+      "repo": "laplacian-blur-detector",
+      "ref": "5419d810e31395d5a36d659a8bfec3176e7ffccd",
+      "license": "MIT",
+      "tier": "featured",
+      "status": "Experimental",
+      "sources": [
+        "README.md",
+        "docs/EXPERIMENTS.md",
+        "laplacian_blur_detector/sharpness.py",
+        "docs/RELEASE_READINESS.md"
+      ]
+    },
+    {
+      "repo": "iRent-AI-Dashboard",
+      "ref": "b10d592d4dcd76a08fe48595dfbc4acd57afee49",
+      "license": "No license specified",
+      "tier": "featured",
+      "status": "Hackathon Prototype",
+      "sources": [
+        "README.md",
+        "backend/src/services/InspectionModels.ts",
+        "ai_service/qwen_contract.py",
+        "SECURITY-CAVEATS.md"
+      ]
+    },
+    {
+      "repo": "OS-presentation",
+      "ref": "87c564a5b6f9a0708fb45554f20c6e177f4eb4a4",
+      "license": "No license specified",
+      "tier": "featured",
+      "status": "Course Project",
+      "sources": [
+        "README.md",
+        "TEST_RESULTS.md",
+        "docs/DASHBOARD_TEST_RESULTS.md",
+        "resource-management/request_simulator.h"
+      ]
+    },
+    {
+      "repo": "web-programming-homeworks",
+      "ref": "f6738f8de2bba9a5c6dc91cc4145f4415109c99a",
+      "license": "No license specified",
+      "tier": "other",
+      "status": "Course Project",
+      "sources": ["README.md", "docs/TESTING.md", "fresh-pomodoro/index.html"]
+    },
+    {
+      "repo": "Intro-to-AI",
+      "ref": "e3e8b58ae5d692f8671102464368a2f365a6bef9",
+      "license": "No license specified",
+      "tier": "coursework",
+      "status": "Course Project",
+      "sources": ["README.md", "final/Artificial_Ecosystem.c"]
+    },
+    {
+      "repo": "Probability-Simulation",
+      "ref": "551aa39ecda6b8acd15b6aa50f19484e10109ea0",
+      "license": "No license specified",
+      "tier": "coursework",
+      "status": "Course Project",
+      "sources": ["README.md", "Q1/q1.py"]
+    },
+    {
+      "repo": "Data-Structure-Homework",
+      "ref": "0514a1c5c315ab83fe3a11ca094d39c873f2ef19",
+      "license": "No license specified",
+      "tier": "coursework",
+      "status": "Course Project",
+      "sources": ["README.md", "hw4/README.md"]
+    }
+  ]
+}

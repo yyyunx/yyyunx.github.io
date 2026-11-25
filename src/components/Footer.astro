@@ -1,8 +1,20 @@
 ---
-import { profile } from "../data/portfolio";
+import { profile } from '../data/portfolio';
+import { ui, type Locale } from '../lib/i18n';
+const { lang } = Astro.props as { lang: Locale };
 ---
 
-<footer id="contact" class="site-footer">
-  <div class="shell footer-grid"><div><a class="brand" href="/">{profile.name}</a></div><div><strong>GitHub</strong><a href={profile.githubHref} target="_blank" rel="noreferrer">{profile.github}</a></div><div><strong>Email</strong><a href={profile.emailHref}>{profile.email}</a></div><div><strong>LinkedIn</strong><a href={profile.linkedinHref}>{profile.linkedin}</a></div></div>
-  <div class="shell footer-bottom">© {new Date().getFullYear()} {profile.name}。保留所有權利。</div>
+<footer class="site-footer" id="contact">
+  <div class="shell footer-inner">
+    <div>
+      <p class="footer-name">{profile.name}</p>
+      <p>{ui[lang].footer}</p>
+    </div>
+    <div class="footer-links">
+      <a href={profile.github}>GitHub</a>
+      <a href={`mailto:${profile.email}`}>Email</a>
+      <a href="/sitemap.xml">Sitemap</a>
+    </div>
+    <p class="copyright">© {new Date().getFullYear()} YunHsi Lee</p>
+  </div>
 </footer>
