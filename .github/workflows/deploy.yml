@@ -22,6 +22,16 @@ jobs:
         uses: actions/checkout@v5
       - name: Install, build, and upload site
         uses: withastro/action@v5
+        with:
+          node-version: '22'
+          package-manager: pnpm@11.10.0
+          build-cmd: pnpm verify
+      - name: Verify external links
+        run: pnpm check:external
+      - name: Install acceptance-test browser
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run browser and accessibility acceptance
+        run: pnpm test:browser
 
   deploy:
     needs: build
