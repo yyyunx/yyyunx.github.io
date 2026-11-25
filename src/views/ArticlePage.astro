@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ArchitectureDiagram from '../components/ArchitectureDiagram.astro';
 import { translationUrl } from '../lib/content';
 import { ui, statuses, categories, pathFor, otherLocale } from '../lib/i18n';
+import { profile } from '../data/portfolio';
 interface Props {
   entry: CollectionEntry<'projects' | 'notes'>;
 }
@@ -34,6 +35,17 @@ const toc = headings.filter((h) => h.depth === 2);
       </p>
       <h1>{data.title}</h1>
       <p class="article-description">{data.description}</p>
+      {profile.participation
+        .filter(
+          (event) =>
+            entry.collection === 'projects' &&
+            event.project === data.translationKey,
+        )
+        .map((event) => (
+          <p class="participation">
+            {event.role} — {event.event}
+          </p>
+        ))}
       <div class="article-metadata">
         {project && (
           <span class="status">{statuses[project.status][lang]}</span>

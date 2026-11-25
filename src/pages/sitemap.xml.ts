@@ -5,7 +5,7 @@ import { locales, pathFor } from '../lib/i18n';
 
 export const GET: APIRoute = async ({ site }) => {
   const fixed = locales.flatMap((lang) =>
-    ['', 'projects', 'notes', 'about', 'research'].map((path) =>
+    ['', 'projects', 'notes', 'about', 'research', 'resume'].map((path) =>
       pathFor(lang, path),
     ),
   );

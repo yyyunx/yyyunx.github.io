@@ -10,7 +10,7 @@ tags: ['React', 'TypeScript', 'Express', 'Python', 'VLM']
 title: 'iRent AI：驗車與營運流程原型'
 description: '黑客松團隊專案，串接照片品質檢查、車損模型介接、案件管理與 LINE 通知，保留人工覆核。'
 repository: 'https://github.com/yyyunx/iRent-AI-Dashboard'
-order: 3
+order: 4
 reviewed: '2026-11-25'
 diagram: 'inspection'
 sources:

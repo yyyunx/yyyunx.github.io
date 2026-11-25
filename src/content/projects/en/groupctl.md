@@ -10,7 +10,7 @@ tags: ['Python', 'Git', 'CLI', 'Agent Skills']
 title: 'groupctl: Git collaboration for people & AI'
 description: 'A CLI and Agent Skills for publishing, reviewing, integrating, and testing work with a traceable Git-based protocol.'
 repository: 'https://github.com/yyyunx/groupctl-ai-collaboration'
-order: 1
+order: 2
 reviewed: '2026-11-25'
 diagram: 'groupctl'
 sources:

@@ -289,7 +289,7 @@
     grid-template-columns: 1.7fr 1fr;
     gap: 80px;
     align-items: start;
-    padding-block: 86px 90px;
+    padding-block: 64px 58px;
   }
   .hero h1 {
     font-size: clamp(2.85rem, 5.1vw, 4.65rem);
@@ -307,6 +307,108 @@
     font-size: 1.04rem;
     max-width: 570px;
     line-height: 1.95;
+  }
+  .hero-education {
+    color: var(--muted);
+    margin-bottom: 22px;
+    line-height: 1.8;
+  }
+  .hero-education .education-name,
+  .education-name {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .hero-education .graduation {
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
+  .interest-topics {
+    list-style: none;
+    padding: 0;
+    margin: 18px 0;
+    display: grid;
+    gap: 10px;
+    font-size: 1.08rem;
+    line-height: 1.5;
+  }
+  .interest-scope {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 18px;
+  }
+  .honor-strip {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 20px;
+    align-items: baseline;
+    border-top: 1px solid var(--line);
+    padding-block: 25px;
+  }
+  .honor-strip h2 {
+    font-size: 1.08rem;
+    letter-spacing: -0.015em;
+    line-height: 1.6;
+  }
+  .coursework-heading {
+    font-size: 1.05rem;
+    margin-block: 25px 8px;
+  }
+  .profile-context {
+    font-size: 0.875rem;
+  }
+  .coursework-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 26px;
+    margin: 0;
+    padding-left: 20px;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .assessment-list {
+    margin: 0;
+    display: grid;
+    gap: 18px;
+  }
+  .assessment-list dt {
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .assessment-list dd {
+    margin: 6px 0 0;
+    color: var(--muted);
+  }
+  .resume-contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 25px;
+    margin-top: 22px;
+    font-size: 0.95rem;
+    overflow-wrap: anywhere;
+  }
+  .resume-projects {
+    display: grid;
+    gap: 25px;
+  }
+  .resume-projects h3 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+  .resume-projects p:last-child {
+    margin-bottom: 0;
+  }
+  .resume-interests {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 30px;
+    padding-left: 20px;
+    margin: 0 0 20px;
+  }
+  .participation {
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 0.9rem;
   }
   .hero-sub {
     color: var(--muted);
@@ -915,7 +1017,7 @@
     }
     .interest-index {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       column-gap: 32px;
       border-left: 0;
       border-top: 1px solid var(--line);
@@ -925,6 +1027,14 @@
     .interest-index > .eyebrow,
     .interest-index > .index-link {
       grid-column: 1 / -1;
+    }
+    .interest-topics {
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 24px;
+    }
+    .honor-strip {
+      grid-template-columns: 1fr;
+      gap: 8px;
     }
     .interest-group + .interest-group {
       border-top: 0;
@@ -966,6 +1076,10 @@
     }
   }
   @media (max-width: 540px) {
+    .coursework-list,
+    .interest-topics {
+      grid-template-columns: 1fr;
+    }
     .shell {
       width: calc(100% - 40px);
     }

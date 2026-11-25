@@ -1,12 +1,76 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import { profile } from '../src/data/portfolio';
 
 const sitemap = await readFile('dist/sitemap.xml', 'utf8');
 const routes = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(
   (match) => new URL(match[1]).pathname,
 );
 const screenshots = 'test-results/screenshots';
+
+test('public profile, project priority, and resume respect the confirmed scope', async ({
+  page,
+}) => {
+  for (const prefix of ['', '/en']) {
+    await page.goto(prefix + '/');
+    await expect(page.locator('h1')).toHaveText(profile.name);
+    await expect(page.locator('.hero-education')).toContainText(
+      profile.education.university,
+    );
+    await expect(page.locator('.hero-education')).toContainText(
+      profile.education.department,
+    );
+    await expect(page.locator('.hero-education')).toContainText(
+      profile.education.program,
+    );
+    await expect(page.locator('.hero-education')).toContainText(
+      'Expected Graduation: June 2028',
+    );
+    await expect(page.locator('.home-projects .project-card')).toHaveCount(4);
+    await expect(page.locator('.home-projects h3 a').first()).toHaveAttribute(
+      'href',
+      prefix + '/projects/os-presentation/',
+    );
+    await expect(page.locator('.hero-links a').first()).toHaveAttribute(
+      'href',
+      prefix + '/resume/',
+    );
+    await expect(page.locator('.honor-strip')).toContainText(
+      'Third Place — n8n Taiwan Open Hackathon 2026',
+    );
+    await page.locator('.hero-links a').first().click();
+    await expect(page).toHaveURL(new RegExp(prefix + '/resume/$'));
+    await expect(page.locator('#education')).toBeVisible();
+    await expect(page.locator('.coursework-list li')).toHaveText([
+      ...profile.education.coursework,
+    ]);
+    await expect(page.locator('.assessment-list')).toContainText('790/990');
+    await expect(page.locator('.assessment-list')).toContainText(
+      '2 problems solved',
+    );
+    await expect(page.locator('a[download], a[href$=".pdf"]')).toHaveCount(0);
+    await expect(page.locator('.participation')).toHaveText(
+      'Participant — 2026 Hotai AI Hackathon',
+    );
+    const mainText = await page.locator('main').innerText();
+    expect(mainText).not.toMatch(
+      /Currently Learning|2026-12-08|2026 年 12 月 8/,
+    );
+    await expect(page.locator('a[href*="n8n"]')).toHaveCount(0);
+    await page.goto(prefix + '/research/');
+    await expect(page.locator('h1')).toHaveText(
+      prefix ? 'Research Interests' : '研究興趣',
+    );
+    await expect(page.locator('.research-list h2')).toHaveCount(6);
+    await expect(page.locator('.roadmap-section')).toContainText(
+      prefix ? 'have not started' : '尚未開始',
+    );
+    await page.goto(prefix + '/about/');
+    await expect(page.locator('#honors + div')).not.toContainText('Hotai');
+    await expect(page.locator('.assessment-list')).toContainText('790/990');
+  }
+});
 
 for (const width of [375, 768, 1024, 1440]) {
   test('all public routes fit a ' + width + 'px viewport', async ({ page }) => {

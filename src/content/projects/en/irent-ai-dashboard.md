@@ -10,7 +10,7 @@ tags: ['React', 'TypeScript', 'Express', 'Python', 'VLM']
 title: 'iRent AI: inspection & operations prototype'
 description: 'A team hackathon prototype connecting photo quality checks, damage-model integration, incident management, and LINE notifications with human review.'
 repository: 'https://github.com/yyyunx/iRent-AI-Dashboard'
-order: 3
+order: 4
 reviewed: '2026-11-25'
 diagram: 'inspection'
 sources:

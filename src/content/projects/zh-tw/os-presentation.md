@@ -6,11 +6,20 @@ category: 'Systems & Computer Architecture'
 tier: 'featured'
 status: 'Course Project'
 license: 'No license specified'
-tags: ['C++', 'Linux', 'epoll', 'Concurrency']
-title: 'OS Experiments：從競爭條件到回壓'
-description: '以售票情境理解 mutex、thread-per-connection、epoll 與有限佇列，對照 Linux 實驗紀錄。'
+tags:
+  [
+    'Linux',
+    'C++',
+    'Concurrency',
+    'Mutex',
+    'epoll',
+    'Thread Pool',
+    'Backpressure',
+  ]
+title: 'Linux 並行與資源管理實驗'
+description: '以 Linux 課程實驗對照 concurrency、mutex、epoll、thread pool 與 backpressure，記錄資源使用及實驗結果。'
 repository: 'https://github.com/yyyunx/OS-presentation'
-order: 4
+order: 1
 reviewed: '2026-11-25'
 diagram: 'systems'
 sources:

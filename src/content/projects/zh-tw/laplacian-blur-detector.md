@@ -10,7 +10,7 @@ tags: ['Python', 'OpenCV', 'NumPy', 'FastAPI']
 title: 'Laplacian Blur Detector'
 description: '比較 Laplacian 與 Tenengrad 清晰度量測，提供局部熱圖、CLI、API 與合成資料實驗紀錄。'
 repository: 'https://github.com/yyyunx/laplacian-blur-detector'
-order: 2
+order: 3
 reviewed: '2026-11-25'
 diagram: 'sharpness'
 sources:

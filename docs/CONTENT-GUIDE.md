@@ -31,6 +31,14 @@ Markdown 原生支援段落、表格、圖片與程式碼。程式碼區塊指�
 
 沒有導入 Mermaid 的瀏覽器執行環境。文字流程圖可用 text code fence；需要圖像時使用自己的 SVG 或 MDX 元件，以避免額外的 client-side bundle。
 
+## 個人資料與 Resume
+
+姓名、正式學校／學程名稱、預計畢業月份、Relevant Coursework、獲獎、參賽及 TOEIC／CPE 成績集中於 src/data/portfolio.ts。About 與 Resume 共用 ProfileDetails.astro，避免兩處成績不同。課程清單不推定各科是否修畢。
+
+目前 Resume 只提供中英文網頁版。profile.resume.publicPdf 保持 null；正式 PDF 必須先由本人確認完整內容及公開權限，再放入 public 並設定該欄位。不要將桌面 LaTeX workspace 或未核准 PDF 複製進 repository。
+
+研究興趣與尚未開始的 Planned Learning 分開管理，沒有實際紀錄前不可改成 Currently Learning。競賽 Participant 不屬於 Honors & Awards；私人 repository 的獲獎經歷可以依本人授權展示，但不得因此附上私人原始碼或技術細節。
+
 ## 翻譯流程
 
 每筆內容用 lang 與 translationKey 配對。兩種語言應保留相同數據、限制、狀態與來源，但用自然語句表達。英文既有地圖筆記目前是精簡整理版。

@@ -1,0 +1,80 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProfileDetails from '../components/ProfileDetails.astro';
+import { profile, researchInterests } from '../data/portfolio';
+import { entries, entryUrl } from '../lib/content';
+import { pathFor, otherLocale, type Locale } from '../lib/i18n';
+const { lang } = Astro.props as { lang: Locale };
+const en = lang === 'en';
+const projects = (await entries('projects', lang))
+  .filter((project) => project.data.tier === 'featured')
+  .slice(0, 4);
+---
+
+<BaseLayout
+  title={'Resume — ' + profile.name}
+  description={
+    en
+      ? 'Education, selected projects, honors, and research interests of YunHsi Lee.'
+      : 'YunHsi Lee 的教育背景、精選專案、獲獎經歷與研究興趣。'
+  }
+  lang={lang}
+  alternate={pathFor(otherLocale(lang), 'resume')}
+>
+  <div class="shell page-shell resume-page">
+    <header class="page-heading">
+      <p class="eyebrow">RESUME</p>
+      <h1>{profile.name}</h1>
+      <p>
+        {en
+          ? 'Undergraduate student in Computer Science and Engineering. Project experience in Linux systems programming, developer tools, and image processing.'
+          : '資訊工程學士班學生，專案經驗以 Linux 系統程式、開發工具與影像處理為主。'}
+      </p>
+      <div class="resume-contact">
+        <a href={'mailto:' + profile.email}>{profile.email}</a>
+        <a href={profile.github}>GitHub</a>
+      </div>
+      {profile.resume.publicPdf && (
+        <a class="button" href={profile.resume.publicPdf} download>
+          {en ? 'Download resume PDF' : '下載履歷 PDF'}
+        </a>
+      )}
+    </header>
+    <ProfileDetails lang={lang} />
+    <section class="about-block" aria-labelledby="resume-interests">
+      <h2 id="resume-interests">{en ? 'Research Interests' : '研究興趣'}</h2>
+      <div>
+        <ul class="resume-interests">
+          {researchInterests.map((item) => (
+            <li>{item.title}</li>
+          ))}
+        </ul>
+        <p>
+          {en
+            ? 'Verilog, RTL, FPGA, and RISC-V study and implementation are planned and have not started.'
+            : 'Verilog、RTL、FPGA 與 RISC-V 的學習和實作尚未開始，仍屬未來規劃。'}
+        </p>
+      </div>
+    </section>
+    <section class="about-block" aria-labelledby="resume-projects">
+      <h2 id="resume-projects">{en ? 'Selected Projects' : '精選專案'}</h2>
+      <div class="resume-projects">
+        {projects.map((project) => (
+          <div>
+            <h3>
+              <a href={entryUrl(project)}>{project.data.title}</a>
+            </h3>
+            <p>{project.data.description}</p>
+            {profile.participation
+              .filter((event) => event.project === project.data.translationKey)
+              .map((event) => (
+                <p class="participation">
+                  {event.role} — {event.event}
+                </p>
+              ))}
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

@@ -7,7 +7,7 @@ const { lang } = Astro.props as { lang: Locale };
 <section class="roadmap-section" aria-labelledby="roadmap-heading">
   <div class="section-heading">
     <div>
-      <p class="eyebrow">LEARNING DIRECTIONS</p>
+      <p class="eyebrow">FUTURE DIRECTIONS</p>
       <h2 id="roadmap-heading">{ui[lang].roadmap}</h2>
     </div>
   </div>
@@ -16,7 +16,7 @@ const { lang } = Astro.props as { lang: Locale };
     {roadmap.map((item) => (
       <div>
         <span class="small-label">
-          {lang === 'en' ? 'To explore' : '準備探索'}
+          {lang === 'en' ? 'Planned · not started' : '規劃中・尚未開始'}
         </span>
         <h3>{item.title}</h3>
         <p>{item.detail[lang]}</p>

@@ -10,7 +10,7 @@ tags: ['Python', 'OpenCV', 'NumPy', 'FastAPI']
 title: 'Laplacian Blur Detector'
 description: 'An experimental image-sharpness toolkit with Laplacian and Tenengrad metrics, local heatmaps, a CLI, and an optional HTTP interface.'
 repository: 'https://github.com/yyyunx/laplacian-blur-detector'
-order: 2
+order: 3
 reviewed: '2026-11-25'
 diagram: 'sharpness'
 sources:

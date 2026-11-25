@@ -2,6 +2,20 @@
 
 本機驗收日期：2026-11-25（Asia/Taipei）。
 
+## 2026-11-26 內容與呈現微調驗收
+
+保留原設計、Astro 與依賴版本，新增雙語網頁 Resume，將已確認的學籍、2028 年 6 月預計畢業、六門正式課名、獲獎與評估成績集中管理。首頁姓名、OS 專案排序、參賽與獲獎界線，以及未開始的硬體規劃均有新增驗收。
+
+- Type checking：0 errors、0 warnings、0 hints；Prettier 與 Astro build 通過。
+- 38 個 HTML 頁面、754 個站內參照、37 個對外 URL 通過。
+- 完整 Chrome suite：11 passed（64.8 秒），沒有 skipped、unexpected 或 flaky。
+- 全頁面於 375、768、1024、1440px 檢查；深淺色各 38 頁的 axe 規則檢查無 violations。
+- 實際瀏覽器另外開啟首頁、Projects、About、Research Interests 與 Resume，確認中英文導覽與排版。
+- 已找到本地 LaTeX workspace 與編譯 PDF，但沒有提交、複製到 public 或提供下載；Resume 只有已核准資料的網頁版。
+- source 與 dist 公開內容掃描通過。私人專案沒有新增 case study、連結或技術細節；n8n 僅列已授權的季軍經歷。
+
+以下保留前一輪驗收條件與結果作為歷史紀錄；本次 browser-report.json 與截圖使用最新版本。
+
 ## 環境與範圍
 
 - Windows、Node.js 22.23.1、pnpm 11.10.0、Astro 7.2.10、TypeScript 6.0.3。

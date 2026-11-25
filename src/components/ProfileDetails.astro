@@ -1,0 +1,56 @@
+---
+import { profile } from '../data/portfolio';
+import type { Locale } from '../lib/i18n';
+const { lang } = Astro.props as { lang: Locale };
+const en = lang === 'en';
+---
+
+<section class="about-block" aria-labelledby="education">
+  <h2 id="education">{en ? 'Education' : '教育背景'}</h2>
+  <div>
+    <p class="education-name">{profile.education.university}</p>
+    <p>
+      {profile.education.department}
+      <br />
+      {profile.education.program}
+    </p>
+    <p>
+      {en ? 'Expected Graduation' : '預計畢業'}:{' '}
+      {profile.education.expectedGraduation[lang]}
+    </p>
+    <h3 class="coursework-heading">Relevant Coursework</h3>
+    <p class="profile-context">
+      {en
+        ? 'Completed or currently enrolled; listed without individual completion status.'
+        : '以下為已修或在修課程，不逐科標示修畢狀態。'}
+    </p>
+    <ul class="coursework-list">
+      {profile.education.coursework.map((course) => (
+        <li>{course}</li>
+      ))}
+    </ul>
+  </div>
+</section>
+<section class="about-block" aria-labelledby="honors">
+  <h2 id="honors">Honors &amp; Awards</h2>
+  <div>
+    {profile.honors.map((award) => (
+      <p>
+        <strong>{award.distinction}</strong> — {award.event}
+      </p>
+    ))}
+  </div>
+</section>
+<section class="about-block" aria-labelledby="assessments">
+  <h2 id="assessments">
+    {en ? 'Language & programming assessments' : '語言與程式能力評估'}
+  </h2>
+  <dl class="assessment-list">
+    {profile.assessments.map((item) => (
+      <div>
+        <dt>{item.name}</dt>
+        <dd>{item.result}</dd>
+      </div>
+    ))}
+  </dl>
+</section>

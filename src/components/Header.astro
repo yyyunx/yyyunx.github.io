@@ -7,7 +7,7 @@ interface Props {
 }
 const { lang, alternate } = Astro.props;
 const t = ui[lang];
-const nav = ['projects', 'notes', 'research', 'about'] as const;
+const nav = ['projects', 'notes', 'research', 'about', 'resume'] as const;
 const current = Astro.url.pathname;
 ---
 

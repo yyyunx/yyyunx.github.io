@@ -10,7 +10,7 @@ tags: ['Python', 'Git', 'CLI', 'Agent Skills']
 title: 'groupctl：人與 AI 的 Git 協作'
 description: '透過 CLI、不可變事件與 Agent Skills，讓發布、審查、整合和測試有清楚的 Git 紀錄。'
 repository: 'https://github.com/yyyunx/groupctl-ai-collaboration'
-order: 1
+order: 2
 reviewed: '2026-11-25'
 diagram: 'groupctl'
 sources:

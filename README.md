@@ -6,17 +6,18 @@ Astro 個人網站，記錄資訊工程學生的公開專案、技術筆記與�
 
 ## 網站架構
 
-| 路徑                        | 內容                                   |
-| --------------------------- | -------------------------------------- |
-| /、/en/                     | 個人介紹、四個精選專案、既有筆記       |
-| /projects/、/en/projects/   | 精選、其他專案與課程紀錄；依分類篩選   |
-| /projects/{translationKey}/ | 專案實作、取捨、來源與限制；英文加 /en |
-| /notes/、/en/notes/         | 技術筆記與尚未完成的學習方向           |
-| /notes/{translationKey}/    | Markdown / MDX 技術筆記；英文加 /en    |
-| /research/、/en/research/   | 已確認的研究興趣                       |
-| /about/、/en/about/         | 學習背景、作品相關技術與聯絡方式       |
-| /404.html、/en/404/         | 找不到頁面                             |
-| /sitemap.xml、/robots.txt   | 公開內容索引與搜尋引擎設定             |
+| 路徑                        | 內容                                                 |
+| --------------------------- | ---------------------------------------------------- |
+| /、/en/                     | 個人介紹、四個精選專案、既有筆記                     |
+| /projects/、/en/projects/   | 精選、其他專案與課程紀錄；依分類篩選                 |
+| /projects/{translationKey}/ | 專案實作、取捨、來源與限制；英文加 /en               |
+| /notes/、/en/notes/         | 技術筆記與尚未完成的學習方向                         |
+| /notes/{translationKey}/    | Markdown / MDX 技術筆記；英文加 /en                  |
+| /research/、/en/research/   | 已確認的研究興趣                                     |
+| /about/、/en/about/         | 學習背景、作品相關技術與聯絡方式                     |
+| /resume/、/en/resume/       | 已確認的教育、課程、獲獎與能力評估；目前僅提供網頁版 |
+| /404.html、/en/404/         | 找不到頁面                                           |
+| /sitemap.xml、/robots.txt   | 公開內容索引與搜尋引擎設定                           |
 
 主要結構：
 

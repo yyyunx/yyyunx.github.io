@@ -6,11 +6,20 @@ category: 'Systems & Computer Architecture'
 tier: 'featured'
 status: 'Course Project'
 license: 'No license specified'
-tags: ['C++', 'Linux', 'epoll', 'Concurrency']
-title: 'OS experiments: races, sockets & backpressure'
-description: 'A systems programming course project using ticket-rush scenarios to study mutexes, thread-per-connection, epoll, and bounded queues.'
+tags:
+  [
+    'Linux',
+    'C++',
+    'Concurrency',
+    'Mutex',
+    'epoll',
+    'Thread Pool',
+    'Backpressure',
+  ]
+title: 'Linux Concurrency and Resource Management Experiments'
+description: 'Linux course experiments in concurrency, mutexes, epoll, thread pools, and backpressure, with recorded resource observations.'
 repository: 'https://github.com/yyyunx/OS-presentation'
-order: 4
+order: 1
 reviewed: '2026-11-25'
 diagram: 'systems'
 sources:
